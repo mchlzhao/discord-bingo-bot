@@ -1,0 +1,26 @@
+lines,probs,did_occur
+lights out and away we go,1,y
+concertina effect,0.2,
+two secs ted,0.7,y
+a day late and a dollar short,0.1,y
+<explains DRS>,0.8,y
+<explains DAS>,0.5,y
+bid for freedom,0.05,y
+wheel to wheel,0.9,
+gambling,0.2,y
+cars abreast,0.2,
+tank slapper,0.05,y
+caught napping,0.1,
+undercut / overcut,0.8,
+pink merc,0.8,
+<wrong driver named>,0.5,y
+brilliant racing,0.9,y
+[colour] striped tyres,0.9,y
+<to guenther steiner>,0.4,
+big lock up there,0.8,
+<overt patriotism>,0.7,y
+new set of boots,0.3,y
+flat out,0.5,
+tyre like a 50p coin,0.1,
+gaining,0.7,
+yielding,0.7,
