@@ -57,7 +57,6 @@ async def on_ready():
 @bot.command(name='test')
 async def test_command(ctx):
     await ctx.message.add_reaction(SUCCESS_EMOJI)
-    await ctx.message.reply('hello')
 
 @bot.command(aliases=['quit'])
 @commands.has_permissions(administrator=True)
@@ -72,10 +71,9 @@ async def view_events(ctx):
     embed = discord.Embed(title='List of Events:')
     for ind, event in enumerate(game.events):
         embed.add_field(
-            name=f'Event {index_to_emoji(event.index)}: {bool_to_emoji(event.is_hit)}',
+            name=f'{bool_to_emoji(event.is_hit)} Event {index_to_emoji(event.index)}:',
             value=f'> {event.desc}'
         )
-    await ctx.message.add_reaction(SUCCESS_EMOJI)
     await ctx.send(embed=embed)
 
 @bot.command(name='view_progress')
@@ -90,7 +88,6 @@ async def view_progress(ctx, *args):
             name=get_name(member),
             value=f'> {board}\n> {mask_to_emoji(mask)}'
         )
-    await ctx.message.add_reaction(SUCCESS_EMOJI)
     await ctx.send(embed=embed)
 
 
@@ -100,9 +97,12 @@ def labelled_message(label, message, emoji=None):
         return f'{emoji} {label}: {message}'
     return f'{label}: {message}'
 
+def embed_title(title, emoji):
+    return f'{emoji} {title} {emoji}'
+
 async def error_reply(ctx, error_message):
-    await ctx.message.add_reaction(FAILURE_EMOJI)
-    await ctx.message.reply(labelled_message('ERROR', error_message, ERROR_EMOJI))
+    embed = discord.Embed(title=embed_title('Error', ERROR_EMOJI), description=error_message)
+    await ctx.message.reply(embed=embed)
 
 
 
@@ -117,7 +117,7 @@ async def set_board_command(ctx, *args):
     is_valid = sorted(chars) == sorted(list(map(index_to_char, range(len(game.events)))))
     game_started = game.has_game_started()
     if game_started:
-        await error_reply(ctx, 'Cannot set board when game has started')
+        await error_reply(ctx, 'Cannot set board when game has already started')
     elif not is_valid:
         await error_reply(ctx, f'Your board is not a permutation of the events A-{index_to_char(len(game.events)-1)}')
     else:
@@ -165,8 +165,11 @@ async def hit(ctx, *args):
         await error_reply(ctx, 'Event is already hit')
         return
     game.hit(event.index)
-    await ctx.message.add_reaction(SUCCESS_EMOJI)
-    await ctx.send(labelled_message('HIT', f'Event {index_to_char(event.index)} "{event.desc}"', HIT_EMOJI))
+    embed = discord.Embed(
+        title=embed_title('HIT', HIT_EMOJI),
+        description=f'Event {index_to_emoji(event.index)}: "{event.desc}"'
+    )
+    await ctx.send(embed=embed)
 
 @bot.command(name='unhit')
 async def unhit(ctx, *args):
@@ -178,5 +181,8 @@ async def unhit(ctx, *args):
         await error_reply(ctx, 'Event is already unhit')
         return
     game.unhit(event.index)
-    await ctx.message.add_reaction(SUCCESS_EMOJI)
-    await ctx.send(labelled_message('UNHIT', f'Event {index_to_char(event.index)} "{event.desc}"', UNHIT_EMOJI))
+    embed = discord.Embed(
+        title=embed_title('UNHIT', UNHIT_EMOJI),
+        description=f'Event {index_to_emoji(event.index)}: "{event.desc}"'
+    )
+    await ctx.send(embed=embed)
