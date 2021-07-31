@@ -5,8 +5,10 @@ from core.Game import Game
 
 SUCCESS_EMOJI = '👍'
 FAILURE_EMOJI = '👎'
+ERROR_EMOJI = '❌'
 HIT_EMOJI = '🟢'
 UNHIT_EMOJI = '🔴'
+HIDDEN_EMOJI = '❔'
 
 def char_to_emoji(c):
     return f':regional_indicator_{c.lower()}:'
@@ -54,7 +56,8 @@ async def on_ready():
 
 @bot.command(name='test')
 async def test_command(ctx):
-    await ctx.send('hello')
+    await ctx.message.add_reaction(SUCCESS_EMOJI)
+    await ctx.message.reply('hello')
 
 @bot.command(aliases=['quit'])
 @commands.has_permissions(administrator=True)
@@ -73,6 +76,7 @@ async def view_events(ctx):
             value=event.desc,
             inline=False
         )
+    await ctx.message.add_reaction(SUCCESS_EMOJI)
     await ctx.send(embed=embed)
 
 @bot.command(name='view_progress')
@@ -82,18 +86,26 @@ async def view_progress(ctx, *args):
     for player_id, entry in game.players.items():
         member = await ctx.guild.fetch_member(player_id)
         mask = entry.get_mask(game.events_hit)
+        board = indices_to_emoji(entry.board) if game.has_game_started() else HIDDEN_EMOJI * len(game.events)
         embed.add_field(
             name=get_name(member),
-            value=f'{indices_to_emoji(entry.board)}\n{mask_to_emoji(mask)}',
+            value=f'{board}\n{mask_to_emoji(mask)}',
             inline=False
         )
+    await ctx.message.add_reaction(SUCCESS_EMOJI)
     await ctx.send(embed=embed)
 
 
 
+def labelled_message(label, message, emoji=None):
+    if emoji:
+        return f'{emoji} {label}: {message}'
+    return f'{label}: {message}'
+
 async def error_reply(ctx, error_message):
     await ctx.message.add_reaction(FAILURE_EMOJI)
-    await ctx.message.reply('ERROR: ' + error_message)
+    await ctx.message.reply(labelled_message('ERROR', error_message, ERROR_EMOJI))
+
 
 
 @bot.command(name='set_board')
@@ -126,7 +138,7 @@ def search_events(s):
 
 async def generic_hit(ctx, search_string):
     search_results = search_events(search_string)
-    if len(search_string) == 1:
+    if search_string.isalpha() and len(search_string) == 1:
         try:
             index = ord(search_string.upper()) - ord('A')
             search_results = [game.events[index]]
@@ -156,7 +168,7 @@ async def hit(ctx, *args):
         return
     game.hit(event.index)
     await ctx.message.add_reaction(SUCCESS_EMOJI)
-    await ctx.message.reply(f'{HIT_EMOJI} HIT: Event {index_to_char(event.index)} "{event.desc}"')
+    await ctx.send(labelled_message('HIT', f'Event {index_to_char(event.index)} "{event.desc}"', HIT_EMOJI))
 
 @bot.command(name='unhit')
 async def unhit(ctx, *args):
@@ -169,4 +181,4 @@ async def unhit(ctx, *args):
         return
     game.unhit(event.index)
     await ctx.message.add_reaction(SUCCESS_EMOJI)
-    await ctx.message.reply(f'{UNHIT_EMOJI} UNHIT: Event {index_to_char(event.index)} {event.desc}')
+    await ctx.send(labelled_message('UNHIT', f'Event {index_to_char(event.index)} "{event.desc}"', UNHIT_EMOJI))
