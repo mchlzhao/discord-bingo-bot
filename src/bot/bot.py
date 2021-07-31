@@ -73,8 +73,7 @@ async def view_events(ctx):
     for ind, event in enumerate(game.events):
         embed.add_field(
             name=f'Event {index_to_emoji(event.index)}: {bool_to_emoji(event.is_hit)}',
-            value=event.desc,
-            inline=False
+            value=f'> {event.desc}'
         )
     await ctx.message.add_reaction(SUCCESS_EMOJI)
     await ctx.send(embed=embed)
@@ -89,8 +88,7 @@ async def view_progress(ctx, *args):
         board = indices_to_emoji(entry.board) if game.has_game_started() else HIDDEN_EMOJI * len(game.events)
         embed.add_field(
             name=get_name(member),
-            value=f'{board}\n{mask_to_emoji(mask)}',
-            inline=False
+            value=f'> {board}\n> {mask_to_emoji(mask)}'
         )
     await ctx.message.add_reaction(SUCCESS_EMOJI)
     await ctx.send(embed=embed)
