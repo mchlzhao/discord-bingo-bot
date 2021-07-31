@@ -3,9 +3,10 @@ from discord.ext import commands
 
 from core.Game import Game
 
-
 SUCCESS_EMOJI = '👍'
 FAILURE_EMOJI = '👎'
+HIT_EMOJI = '🟢'
+UNHIT_EMOJI = '🔴'
 
 def char_to_emoji(c):
     return f':regional_indicator_{c.lower()}:'
@@ -26,7 +27,7 @@ def indices_to_emoji(l):
     return ''.join(map(index_to_emoji, l))
 
 def bool_to_emoji(b):
-    return ':white_check_mark:' if b else ':black_circle:'
+    return HIT_EMOJI if b else UNHIT_EMOJI
 
 def mask_to_emoji(m):
     return ''.join(map(bool_to_emoji, m))
@@ -45,21 +46,21 @@ async def on_ready():
     print('Bot ready')
     game = Game('Test Game', None)
     game.set_events([
-        '"Lights out and away we go"',
-        '"Down the inside/round the outside',
+        '> Lights out and away we go',
+        '> Down the inside/round the outside',
         'MazesBin DNFs'
-    ])
-    game.set_player(740728443611775006, [2, 1, 0])
+    ] + [f'Event {i}' for i in range(4, 11)])
+    game.set_player(740728443611775006, list(range(10)))
 
 @bot.command(name='test')
 async def test_command(ctx):
     await ctx.send('hello')
 
-@bot.command(aliases=["quit"])
+@bot.command(aliases=['quit'])
 @commands.has_permissions(administrator=True)
 async def close(ctx):
     await bot.close()
-    print("Bot Closed")
+    print('Bot Closed')
 
 
 
@@ -68,7 +69,7 @@ async def view_events(ctx):
     embed = discord.Embed(title='List of Events:')
     for ind, event in enumerate(game.events):
         embed.add_field(
-            name='Event ' + index_to_emoji(event.index),
+            name=f'Event {index_to_emoji(event.index)}: {bool_to_emoji(event.is_hit)}',
             value=event.desc,
             inline=False
         )
@@ -79,14 +80,21 @@ async def view_progress(ctx, *args):
     print('<>view_progress', args)
     embed = discord.Embed(title='Player Progress:')
     for player_id, entry in game.players.items():
-        member = ctx.guild.get_member(player_id)
+        member = await ctx.guild.fetch_member(player_id)
         mask = entry.get_mask(game.events_hit)
         embed.add_field(
             name=get_name(member),
-            value=indices_to_emoji(entry.board) + '\n' + mask_to_emoji(mask),
+            value=f'{indices_to_emoji(entry.board)}\n{mask_to_emoji(mask)}',
             inline=False
         )
     await ctx.send(embed=embed)
+
+
+
+async def error_reply(ctx, error_message):
+    await ctx.message.add_reaction(FAILURE_EMOJI)
+    await ctx.message.reply('ERROR: ' + error_message)
+
 
 @bot.command(name='set_board')
 async def set_board_command(ctx, *args):
@@ -97,10 +105,68 @@ async def set_board_command(ctx, *args):
 
     # need to ensure all indices 1 to n are featured exactly once
     is_valid = sorted(chars) == sorted(list(map(index_to_char, range(len(game.events)))))
-    if is_valid:
-        board_order = list(map(char_to_index, chars))
-        game.set_player(ctx.author.id, board_order)
-        await ctx.message.add_reaction(SUCCESS_EMOJI)
+    game_started = game.has_game_started()
+    if game_started:
+        await error_reply(ctx, 'Cannot set board when game has started')
+    elif not is_valid:
+        await error_reply(ctx, f'Your board is not a permutation of the events A-{index_to_char(len(game.events)-1)}')
     else:
-        await ctx.message.add_reaction(FAILURE_EMOJI)
-        await ctx.send(f'ERROR <@{ctx.author.id}>: Your board is not a permutation of the events')
+        board_order = list(map(char_to_index, chars))
+        game.set_player(str(ctx.author.id), board_order)
+        await ctx.message.add_reaction(SUCCESS_EMOJI)
+
+
+
+def search_events(s):
+    matches = []
+    for event in game.events:
+        if s.lower() in event.desc.lower():
+            matches.append(event)
+    return matches
+
+async def generic_hit(ctx, search_string):
+    search_results = search_events(search_string)
+    if len(search_string) == 1:
+        try:
+            index = ord(search_string.upper()) - ord('A')
+            search_results = [game.events[index]]
+        except IndexError:
+            await error_reply(ctx, f'Event index must be between A-{index_to_char(len(game.events)-1)}')
+            return None
+    if len(search_results) == 0:
+        await error_reply(ctx, f'No event matches "{search_string}"')
+        return None
+    if len(search_results) > 1:
+        error_str = f'More than one event matches "{search_string}"\n'
+        error_str += f'Matches include: "{search_results[0].desc}", "{search_results[1].desc}"'
+        if len(search_results) > 2:
+            error_str += ', ...'
+        await error_reply(ctx, error_str)
+        return None
+    return search_results[0]
+
+@bot.command(name='hit')
+async def hit(ctx, *args):
+    search_string = ' '.join(args)
+    event = await generic_hit(ctx, search_string)
+    if event is None:
+        return
+    if event.is_hit:
+        await error_reply(ctx, 'Event is already hit')
+        return
+    game.hit(event.index)
+    await ctx.message.add_reaction(SUCCESS_EMOJI)
+    await ctx.message.reply(f'{HIT_EMOJI} HIT: Event {index_to_char(event.index)} "{event.desc}"')
+
+@bot.command(name='unhit')
+async def unhit(ctx, *args):
+    search_string = ' '.join(args)
+    event = await generic_hit(ctx, search_string)
+    if event is None:
+        return
+    if not event.is_hit:
+        await error_reply(ctx, 'Event is already unhit')
+        return
+    game.unhit(event.index)
+    await ctx.message.add_reaction(SUCCESS_EMOJI)
+    await ctx.message.reply(f'{UNHIT_EMOJI} UNHIT: Event {index_to_char(event.index)} {event.desc}')

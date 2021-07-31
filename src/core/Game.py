@@ -19,11 +19,13 @@ class Game:
     def hit(self, id):
         event = self.events[id]
         if event not in self.events_hit:
+            event.is_hit = True
             self.events_hit.append(event)
     
     def unhit(self, id):
         event = self.events[id]
         if event in self.events_hit:
+            event.is_hit = False
             self.events_hit.remove(event)
     
     def calculate_players_won(self):
@@ -32,3 +34,6 @@ class Game:
             if entry.has_won(self.events_hit):
                 players_won.append(player_id)
         return players_won
+
+    def has_game_started(self):
+        return len(self.events_hit) > 0
