@@ -14,6 +14,8 @@ HIDDEN_EMOJI = '❔'
 NUM_BOARDS = 4
 BOARD_SIZE = 3
 
+FROM_DAT = True
+
 def char_to_emoji(c):
     return f':regional_indicator_{c.lower()}:'
 
@@ -43,7 +45,7 @@ def get_name(member):
 
 
 
-bot = commands.Bot(command_prefix='<>')
+bot = commands.Bot(command_prefix='<>', help_command=None)
 game = None
 
 @bot.event
@@ -51,24 +53,72 @@ async def on_ready():
     global game
     print('Bot ready')
     game = Game('Test Game', None)
-    game.set_events([
-        '> Lights out and away we go',
-        '> Down the inside/round the outside',
-        'MazesBin DNFs'
-    ] + [f'Event {i}' for i in range(4, 11)])
-    game.set_player(740728443611775006, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2])
-    game.set_player(741134158247755886, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2])
-    game.set_player(865037902529953793, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2])
+    if FROM_DAT:
+        with open('data/events.dat', 'r') as events_file:                
+            already_hit = []
+            event_strs = []
+            for line in events_file:
+                tokens = line.strip().split('~')
+                index = int(tokens[0])
+                desc = tokens[1]
+                is_hit = tokens[2] == 'True'
+                if is_hit:
+                    already_hit.append(index)
+                event_strs.append(desc)
+            game.set_events(event_strs)
+
+        with open('data/players.dat', 'r') as players_file:
+            for line in players_file:
+                tokens = line.split('~')
+                player_id = tokens[0]
+                entry = list(map(int, tokens[1:]))
+                game.set_player(player_id, entry)
+        
+        for i in already_hit:
+            game.hit(i)
+    else:
+        game.set_events([
+            '> Lights out and away we go',
+            '> Down the inside/round the outside',
+            'MazesBin DNFs'
+        ] + [f'Event {i}' for i in range(4, 11)])
+        game.set_player(740728443611775006, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2])
+        game.set_player(741134158247755886, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2])
+        game.set_player(865037902529953793, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2])
 
 @bot.command(name='test')
 async def test_command(ctx):
     await ctx.message.add_reaction(SUCCESS_EMOJI)
 
-@bot.command(aliases=['quit'])
-@commands.has_permissions(administrator=True)
-async def close(ctx):
-    await bot.close()
-    print('Bot Closed')
+@bot.command(name='help')
+async def help(ctx):
+    embed = discord.Embed(title='Bingo Bot Help:')
+    embed.add_field(
+        name='<>set_entry [ABC DEF GHI JKL]',
+        value=f'Assign {NUM_BOARDS} combos of {BOARD_SIZE} events each. If all {BOARD_SIZE} events occur in any combo, you win. Each event cannot be repeated in a combo, but can be in more than one combo. Entry can be freely changed as long as no event has been hit.',
+        inline=False
+    )
+    embed.add_field(
+        name='<>hit [event]',
+        value='Hit an event once it has occurred.',
+        inline=False
+    )
+    embed.add_field(
+        name='<>unhit [event]',
+        value='Unhit an event if it was mistakenly hit.',
+        inline=False
+    )
+    embed.add_field(
+        name='<>view_events',
+        value='Lists all events to make combos from.',
+        inline=False
+    )
+    embed.add_field(
+        name='<>view_progress',
+        value='Lists all players, their chosen entries and their progress on each combo. If no event has been hit, entries are kept secret.',
+        inline=False
+    )
+    await ctx.message.reply(embed=embed)
 
 
 
@@ -110,6 +160,25 @@ async def view_progress(ctx, *args):
                 inline=False
             )
     await ctx.send(embed=progress_embed)
+
+
+
+def save_game_to_file():
+    with open('data/events.dat', 'w') as events_file:
+        for event in game.events:
+            print(
+                '~'.join(map(str, (event.index, event.desc, event.is_hit))),
+                file=events_file
+            )
+    with open('data/players.dat', 'w') as players_file:
+        for player_id, entry in game.players.items():
+            entry_order = []
+            for board in entry.boards:
+                entry_order.extend(board.board_order)
+            print(
+                '~'.join(map(str, [player_id] + entry_order)),
+                file=players_file
+            )
 
 
 
@@ -158,6 +227,7 @@ async def set_entry_command(ctx, *args):
     global progress_embed
     progress_embed = None
     await ctx.message.add_reaction(SUCCESS_EMOJI)
+    save_game_to_file()
 
 
 
@@ -213,6 +283,7 @@ async def hit(ctx, *args):
             description=f'<@{winner_id}> has just won!\n\n> {board_str}\n> {mask_str}'
         )
         await ctx.send(embed=embed)
+    save_game_to_file()
 
 @bot.command(name='unhit')
 async def unhit(ctx, *args):
@@ -231,3 +302,4 @@ async def unhit(ctx, *args):
         description=f'Event {index_to_emoji(event.index)}: "{event.desc}"'
     )
     await ctx.send(embed=embed)
+    save_game_to_file()
