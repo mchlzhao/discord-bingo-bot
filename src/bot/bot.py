@@ -84,27 +84,31 @@ async def view_events(ctx):
 
 progress_embed = None
 
+def get_player_progress(player_id):
+    entry = game.players[player_id]
+    masks = entry.get_masks(game.events_hit_dict)
+    mask_str = SPACER_EMOJI.join(map(mask_to_emoji, masks))
+    if game.has_started():
+        boards = [board.board_order for board in entry.boards]
+        board_str = SPACER_EMOJI.join(map(indices_to_emoji, boards))
+    else:
+        boards = [HIDDEN_EMOJI * BOARD_SIZE] * NUM_BOARDS
+        board_str = SPACER_EMOJI.join(boards)
+    return (board_str, mask_str)
+
 @bot.command(name='view_progress')
 async def view_progress(ctx, *args):
     global progress_embed
     if progress_embed is None:
         progress_embed = discord.Embed(title='Player Progress:')
-        for player_id, entry in game.players.items():
+        for player_id in game.players:
             member = await ctx.guild.fetch_member(player_id)
-            masks = entry.get_masks(game.events_hit_dict)
-            mask_str = SPACER_EMOJI.join(map(mask_to_emoji, masks))
-            if game.has_started():
-                boards = [board.board_order for board in entry.boards]
-                board_str = SPACER_EMOJI.join(map(indices_to_emoji, boards))
-            else:
-                boards = [HIDDEN_EMOJI * BOARD_SIZE] * NUM_BOARDS
-                board_str = SPACER_EMOJI.join(boards)
+            board_str, mask_str = get_player_progress(player_id)
             progress_embed.add_field(
                 name=get_name(member),
                 value=f'> {board_str}\n> {mask_str}',
                 inline=False
             )
-
     await ctx.send(embed=progress_embed)
 
 
@@ -194,7 +198,7 @@ async def hit(ctx, *args):
     if event.is_hit:
         await error_reply(ctx, 'Event is already hit')
         return
-    game.hit(event.index)
+    new_winners = game.hit(event.index)
     global progress_embed
     progress_embed = None
     embed = discord.Embed(
@@ -202,6 +206,13 @@ async def hit(ctx, *args):
         description=f'Event {index_to_emoji(event.index)}: "{event.desc}"'
     )
     await ctx.send(embed=embed)
+    for winner_id in new_winners:
+        board_str, mask_str = get_player_progress(winner_id)
+        embed = discord.Embed(
+            title=embed_title('WIN', '🎊 🥳 🎉 🎊 🥳 🎉'),
+            description=f'<@{winner_id}> has just won!\n\n> {board_str}\n> {mask_str}'
+        )
+        await ctx.send(embed=embed)
 
 @bot.command(name='unhit')
 async def unhit(ctx, *args):
