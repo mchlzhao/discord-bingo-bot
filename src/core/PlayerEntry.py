@@ -1,16 +1,16 @@
-class PlayerEntry:
-    def __init__(self, board, IN_A_ROW=4):
-        self.board = board
-        self.IN_A_ROW = IN_A_ROW
-    
-    def get_mask(self, events_hit):
-        events_ind = list(map(lambda x: x.index, events_hit))
-        return [index in events_ind for index in self.board]
+from core.PlayerBoard import PlayerBoard
 
-    def has_won(self, events_hit):
-        mask = self.get_mask(events_hit)
-        for i in range(len(mask) - IN_A_ROW + 1):
-            sublist = mask[i:i + IN_A_ROW]
-            if all(sublist):
-                return True
-        return False
+class PlayerEntry:
+    def __init__(self, board_order):
+        self.NUM_BOARDS = 4
+        self.BOARD_SIZE = 3
+
+        self.boards = []
+        for i in range(0, self.NUM_BOARDS * self.BOARD_SIZE, self.BOARD_SIZE):
+            self.boards.append(PlayerBoard(board_order[i:i + self.BOARD_SIZE]))
+    
+    def get_masks(self, events_hit_dict):
+        return [board.get_mask(events_hit_dict) for board in self.boards]
+
+    def has_won(self, events_hit_dict):
+        return any([board.has_won(events_hit_dict) for board in self.boards])

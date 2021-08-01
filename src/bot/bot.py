@@ -8,7 +8,11 @@ FAILURE_EMOJI = '👎'
 ERROR_EMOJI = '❌'
 HIT_EMOJI = '🟢'
 UNHIT_EMOJI = '🔴'
+SPACER_EMOJI = '▪️'
 HIDDEN_EMOJI = '❔'
+
+NUM_BOARDS = 4
+BOARD_SIZE = 3
 
 def char_to_emoji(c):
     return f':regional_indicator_{c.lower()}:'
@@ -52,7 +56,9 @@ async def on_ready():
         '> Down the inside/round the outside',
         'MazesBin DNFs'
     ] + [f'Event {i}' for i in range(4, 11)])
-    game.set_player(740728443611775006, list(range(10)))
+    game.set_player(740728443611775006, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2])
+    game.set_player(741134158247755886, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2])
+    game.set_player(865037902529953793, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2])
 
 @bot.command(name='test')
 async def test_command(ctx):
@@ -71,24 +77,35 @@ async def view_events(ctx):
     embed = discord.Embed(title='List of Events:')
     for ind, event in enumerate(game.events):
         embed.add_field(
-            name=f'{bool_to_emoji(event.is_hit)} Event {index_to_emoji(event.index)}:',
+            name=f'Event {index_to_emoji(event.index)} - {bool_to_emoji(event.is_hit)}:',
             value=f'> {event.desc}'
         )
     await ctx.send(embed=embed)
 
+progress_embed = None
+
 @bot.command(name='view_progress')
 async def view_progress(ctx, *args):
-    print('<>view_progress', args)
-    embed = discord.Embed(title='Player Progress:')
-    for player_id, entry in game.players.items():
-        member = await ctx.guild.fetch_member(player_id)
-        mask = entry.get_mask(game.events_hit)
-        board = indices_to_emoji(entry.board) if game.has_game_started() else HIDDEN_EMOJI * len(game.events)
-        embed.add_field(
-            name=get_name(member),
-            value=f'> {board}\n> {mask_to_emoji(mask)}'
-        )
-    await ctx.send(embed=embed)
+    global progress_embed
+    if progress_embed is None:
+        progress_embed = discord.Embed(title='Player Progress:')
+        for player_id, entry in game.players.items():
+            member = await ctx.guild.fetch_member(player_id)
+            masks = entry.get_masks(game.events_hit_dict)
+            mask_str = SPACER_EMOJI.join(map(mask_to_emoji, masks))
+            if game.has_started():
+                boards = [board.board_order for board in entry.boards]
+                board_str = SPACER_EMOJI.join(map(indices_to_emoji, boards))
+            else:
+                boards = [HIDDEN_EMOJI * BOARD_SIZE] * NUM_BOARDS
+                board_str = SPACER_EMOJI.join(boards)
+            progress_embed.add_field(
+                name=get_name(member),
+                value=f'> {board_str}\n> {mask_str}',
+                inline=False
+            )
+
+    await ctx.send(embed=progress_embed)
 
 
 
@@ -106,24 +123,37 @@ async def error_reply(ctx, error_message):
 
 
 
-@bot.command(name='set_board')
-async def set_board_command(ctx, *args):
+@bot.command(name='set_entry')
+async def set_entry_command(ctx, *args):
+    if game.has_started():
+        await error_reply(ctx, 'Cannot set board when game has already started')
+        return
+
     # remove all newlines, extraneous characters
     chars = map(lambda x: [y for y in x], args)
     chars = [c for sublist in chars for c in sublist]
     chars = list(filter(str.isalpha, chars))
+    
+    if len(chars) != NUM_BOARDS * BOARD_SIZE:
+        await error_reply(ctx, f'Entry is invalid: must have {NUM_BOARDS} boards of {BOARD_SIZE}')
+        return
 
     # need to ensure all indices 1 to n are featured exactly once
-    is_valid = sorted(chars) == sorted(list(map(index_to_char, range(len(game.events)))))
-    game_started = game.has_game_started()
-    if game_started:
-        await error_reply(ctx, 'Cannot set board when game has already started')
-    elif not is_valid:
-        await error_reply(ctx, f'Your board is not a permutation of the events A-{index_to_char(len(game.events)-1)}')
-    else:
-        board_order = list(map(char_to_index, chars))
-        game.set_player(str(ctx.author.id), board_order)
-        await ctx.message.add_reaction(SUCCESS_EMOJI)
+    entry_order = []
+    for i in range(0, NUM_BOARDS * BOARD_SIZE, BOARD_SIZE):
+        board = sorted(list(map(char_to_index, chars[i:i + BOARD_SIZE])))
+        if board != sorted(list(set(board))):
+            await error_reply(ctx, f'Multi {i // BOARD_SIZE + 1} is invalid: events in a board must be unique')
+            return
+        if max(board) >= len(game.events):
+            await error_reply(ctx, f'Multi {i // BOARD_SIZE + 1} is invalid: event indices must be between A-{index_to_char(len(game.events) - 1)}')
+            return
+        entry_order.extend(board)
+
+    game.set_player(str(ctx.author.id), entry_order)
+    global progress_embed
+    progress_embed = None
+    await ctx.message.add_reaction(SUCCESS_EMOJI)
 
 
 
@@ -165,6 +195,8 @@ async def hit(ctx, *args):
         await error_reply(ctx, 'Event is already hit')
         return
     game.hit(event.index)
+    global progress_embed
+    progress_embed = None
     embed = discord.Embed(
         title=embed_title('HIT', HIT_EMOJI),
         description=f'Event {index_to_emoji(event.index)}: "{event.desc}"'
@@ -181,6 +213,8 @@ async def unhit(ctx, *args):
         await error_reply(ctx, 'Event is already unhit')
         return
     game.unhit(event.index)
+    global progress_embed
+    progress_embed = None
     embed = discord.Embed(
         title=embed_title('UNHIT', UNHIT_EMOJI),
         description=f'Event {index_to_emoji(event.index)}: "{event.desc}"'
