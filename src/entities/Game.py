@@ -3,10 +3,11 @@ from typing import List
 
 
 class Game:
-    def __init__(self, guild_id: str, time_created: datetime,
+    def __init__(self, game_id: str, server_id: str, time_started: datetime,
                  time_finished: datetime, player_win_order: List[str]) -> None:
-        self.guild_id = guild_id
-        self.time_created = time_created
+        self.game_id = game_id
+        self.server_id = server_id
+        self.time_started = time_started
         self.time_finished = time_finished
         self.player_win_order = player_win_order
 
