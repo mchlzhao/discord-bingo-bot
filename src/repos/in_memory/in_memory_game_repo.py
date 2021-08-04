@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from entities.Game import Game
+from entities.game import Game
 from repos.in_memory.data_store import game_store
 
 

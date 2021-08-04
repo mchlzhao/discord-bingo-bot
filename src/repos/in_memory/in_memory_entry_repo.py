@@ -1,10 +1,10 @@
 from typing import List, Optional, Tuple
 
-from src.entites.Entry import Entry
-from src.entities.EventCombo import EventCombo
+from entities.entry import Entry
+from entities.event_combo import EventCombo
 
 
-class PostgresEntryRepo:
+class InMemoryEntryRepo:
     def create_entry(self, game_id: str, player_id: str,
                      combos: List[EventCombo]) -> None:
         pass

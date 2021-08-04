@@ -1,6 +1,6 @@
 from typing import List
 
-from entities.Event import Event
+from entities.event import Event
 
 
 class EventCombo:

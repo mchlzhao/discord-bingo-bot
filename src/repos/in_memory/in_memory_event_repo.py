@@ -1,7 +1,7 @@
 from typing import List, Optional
 
-from entities.Event import Event
-from repos.abstract.IEventRepo import IEventRepo
+from entities.event import Event
+from repos.abstract.ievent_repo import IEventRepo
 from repos.in_memory.data_store import game_store
 
 

@@ -1,6 +1,6 @@
 from typing import Optional
 
-from src.entities.Game import Game
+from src.entities.game import Game
 
 
 class PostgresGameRepo:
