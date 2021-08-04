@@ -4,4 +4,4 @@ env/
 *.swp
 *.dat
 .DS_Store
-
+.vscode

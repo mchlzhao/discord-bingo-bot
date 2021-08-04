@@ -1,7 +1,7 @@
 from typing import List, Optional, Tuple
 
-from entities.entry import Entry
-from entities.event_combo import EventCombo
+from src.entities.entry import Entry
+from src.entities.event_combo import EventCombo
 
 
 class InMemoryEntryRepo:
