@@ -1,11 +1,12 @@
 from typing import List
 
-from entities.event import Event
+from src.entities.event import Event
 
 
-class EventCombo:
-    def __init__(self, events: List[Event]):
+class Combo:
+    def __init__(self, events: List[Event], index: int):
         self.events = events
+        self.index = index
 
     def has_won(self):
         return all(map(lambda x: x.is_hit, self.events))

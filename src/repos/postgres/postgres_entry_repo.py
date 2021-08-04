@@ -1,19 +1,19 @@
 from typing import List, Optional, Tuple
 
 from src.entites.entry import Entry
-from src.entities.event_combo import EventCombo
+from src.entities.combo import Combo
 
 
 class PostgresEntryRepo:
     def create_entry(self, game_id: str, player_id: str,
-                     combos: List[EventCombo]) -> None:
+                     combos: List[Combo]) -> None:
         pass
 
     def read_combos_by_player(self, game_id: str, player_id: str) \
-            -> List[EventCombo]:
+            -> List[Combo]:
         pass
 
-    def read_all_combos(self, game_id: str) -> Tuple[str, List[EventCombo]]:
+    def read_all_combos(self, game_id: str) -> Tuple[str, List[Combo]]:
         pass
 
     def read_entry(self, game_id: str, player_id: str) -> Optional[Entry]:

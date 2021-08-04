@@ -6,7 +6,7 @@ from src.repos.in_memory.data_store import DataStore
 
 
 class InMemoryGameRepo:
-    def __init__(self, data_store: DataStore) -> None:
+    def __init__(self, data_store: DataStore):
         self.next_game_id = 0
         self.data_store = data_store
 
