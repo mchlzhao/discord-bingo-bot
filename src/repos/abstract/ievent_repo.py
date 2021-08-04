@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
 
-from entities.event import Event
+from src.entities.event import Event
 
 
 class IEventRepo(ABC):

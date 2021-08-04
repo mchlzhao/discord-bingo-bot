@@ -1,14 +1,14 @@
 from datetime import datetime
 import unittest
 
-from src.repos.in_memory.data_store import clear_game_store
+from src.repos.in_memory.data_store import DataStore
 from src.repos.in_memory.in_memory_game_repo import InMemoryGameRepo
 
 
 class TestInMemoryGameRepo(unittest.TestCase):
     def setUp(self):
-        clear_game_store()
-        self.game_repo = InMemoryGameRepo()
+        data_store = DataStore()
+        self.game_repo = InMemoryGameRepo(data_store)
         self.server_id = 'test_server'
         self.game = self.game_repo.create_game(self.server_id)
 
