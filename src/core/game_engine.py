@@ -49,7 +49,8 @@ class GameEngine:
         combos = []
         for combo_index, event_indices in enumerate(combo_set_indices):
             try:
-                combos.append(Combo([events[i] for i in event_indices]))
+                combos.append(Combo([events[i]
+                              for i in event_indices], combo_index))
             except IndexError:
                 raise DisplayableError('Invalid event index.')
         combo_set = ComboSet(player_id, combos)

@@ -35,4 +35,7 @@ class InMemoryPlayerRepo(IPlayerRepo):
         self.data_store.entries[entry.game_id][entry.player_id] = entry
 
     def delete_entry(self, game_id: str, player_id: str) -> None:
-        del self.data_store.entries[game_id][player_id]
+        try:
+            del self.data_store.entries[game_id][player_id]
+        except KeyError:
+            pass
