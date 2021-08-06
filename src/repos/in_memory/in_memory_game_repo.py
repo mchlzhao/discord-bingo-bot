@@ -15,6 +15,9 @@ class InMemoryGameRepo(IGameRepo):
         self.next_game_id += 1
         game = Game(self.next_game_id, server_id, datetime.now(), None)
         self.data_store.games[game.game_id] = game
+
+        self.data_store.entries[game.game_id] = {}
+        self.data_store.combo_sets[game.game_id] = {}
         return game
 
     def read_active_game(self, server_id: str) -> Optional[Game]:
