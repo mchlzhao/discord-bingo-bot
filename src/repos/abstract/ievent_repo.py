@@ -18,10 +18,10 @@ class IEventRepo(ABC):
         pass
 
     @abstractmethod
-    def read_events_by_desc(self, game_id: str, desc_search_str: str) \
-            -> List[Event]:
+    def read_events_by_desc(self, game_id: str,
+                            desc_search_str: str) -> List[Event]:
         pass
 
     @abstractmethod
-    def update_event(self, Event) -> None:
+    def update_event(self, game_id: str, event: Event) -> None:
         pass

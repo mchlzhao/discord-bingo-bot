@@ -2,10 +2,11 @@ from typing import List, Optional
 
 from src.entities.combo_set import ComboSet
 from src.entities.entry import Entry
+from src.repos.abstract.iplayer_repo import IPlayerRepo
 from src.repos.in_memory.data_store import DataStore
 
 
-class InMemoryPlayerRepo:
+class InMemoryPlayerRepo(IPlayerRepo):
     def __init__(self, data_store: DataStore):
         self.data_store = data_store
         self.next_entry_id = 0
@@ -34,4 +35,7 @@ class InMemoryPlayerRepo:
         self.data_store.entries[entry.game_id][entry.player_id] = entry
 
     def delete_entry(self, game_id: str, player_id: str) -> None:
-        del self.data_store.entries[game_id][player_id]
+        try:
+            del self.data_store.entries[game_id][player_id]
+        except KeyError:
+            pass

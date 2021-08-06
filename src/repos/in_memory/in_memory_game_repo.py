@@ -2,10 +2,11 @@ from datetime import datetime
 from typing import Optional
 
 from src.entities.game import Game
+from src.repos.abstract.igame_repo import IGameRepo
 from src.repos.in_memory.data_store import DataStore
 
 
-class InMemoryGameRepo:
+class InMemoryGameRepo(IGameRepo):
     def __init__(self, data_store: DataStore):
         self.next_game_id = 0
         self.data_store = data_store
