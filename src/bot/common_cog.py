@@ -7,12 +7,6 @@ from src.entities.event import Event
 
 
 class CommonCog:
-    async def display_error_response(self, ctx: commands.Context,
-                                     error_message: str):
-        embed = discord.Embed(
-            title=f'{ERROR_EMOJI} Error', description=error_message)
-        await ctx.message.reply(embed=embed)
-
     def custom_embed(self, title: str, desc: str,
                      fields: List[Tuple[str, str]] = [], inline=True):
         if desc is None:
@@ -23,6 +17,13 @@ class CommonCog:
         for name, value in fields:
             embed.add_field(name=name, value=value, inline=inline)
         return embed
+
+    async def display_error_response(self, ctx: commands.Context,
+                                     error_message: str):
+        embed = discord.Embed(
+            title=f'{ERROR_EMOJI} Error', description=error_message,
+            colour=discord.Colour.dark_red())
+        await ctx.message.reply(embed=embed)
 
     def events_to_fields(self, events: List[Event], include_is_hit: bool):
         fields = []
