@@ -9,9 +9,12 @@ class InMemoryEventRepo(IEventRepo):
     def __init__(self, data_store: DataStore):
         self.data_store = data_store
 
-    def create_events(self, game_id: str, event_strs: List[str]) -> None:
-        self.data_store.events[game_id] = [
-            Event(desc, i, False) for i, desc in enumerate(event_strs)]
+    def create_events(self, game_id: str, event_strs: List[str]) \
+            -> List[Event]:
+        events = [Event(desc, i, False)
+                  for i, desc in enumerate(event_strs)]
+        self.data_store.events[game_id] = events
+        return events
 
     def read_all_events(self, game_id: str) -> List[Event]:
         return self.data_store.events[game_id]

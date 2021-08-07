@@ -6,7 +6,8 @@ from src.entities.event import Event
 
 class IEventRepo(ABC):
     @abstractmethod
-    def create_events(self, game_id: str, event_strs: List[str]) -> None:
+    def create_events(self, game_id: str, event_strs: List[str]) \
+            -> List[Event]:
         pass
 
     @abstractmethod
