@@ -25,7 +25,7 @@ class InMemoryPlayerRepo(IPlayerRepo):
                 for combo_set in self.data_store.combo_sets[game_id].values()]
 
     def read_entry(self, game_id: str, player_id: str) -> Optional[Entry]:
-        return self.data_store.entries[game_id][player_id]
+        return self.data_store.entries[game_id].get(player_id, None)
 
     def update_entry(self, entry: Entry) -> None:
         self.data_store.entries[entry.game_id][entry.player_id] = entry

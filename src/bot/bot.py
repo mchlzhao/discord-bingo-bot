@@ -9,8 +9,8 @@ UNHIT_EMOJI = '🔴'
 SPACER_EMOJI = '▪️'
 HIDDEN_EMOJI = '❔'
 
-NUM_BOARDS = 4
-BOARD_SIZE = 3
+NUM_COMBOS = 4
+COMBO_SIZE = 3
 
 FROM_DAT = True
 
@@ -108,7 +108,7 @@ async def help(ctx):
     embed = discord.Embed(title='Bingo Bot Help:')
     embed.add_field(
         name='<>set_entry [ABC DEF GHI JKL]',
-        value=f'Assign {NUM_BOARDS} combos of {BOARD_SIZE} events each. If all {BOARD_SIZE} events occur in any combo, you win. Each event cannot be repeated in a combo, but can be in more than one combo. Entry can be freely changed as long as no event has been hit.',
+        value=f'Assign {NUM_COMBOS} combos of {COMBO_SIZE} events each. If all {COMBO_SIZE} events occur in any combo, you win. Each event cannot be repeated in a combo, but can be in more than one combo. Entry can be freely changed as long as no event has been hit.',
         inline=False
     )
     embed.add_field(
@@ -155,7 +155,7 @@ def get_player_progress(player_id):
         boards = [board.board_order for board in entry.boards]
         board_str = SPACER_EMOJI.join(map(indices_to_emoji, boards))
     else:
-        boards = [HIDDEN_EMOJI * BOARD_SIZE] * NUM_BOARDS
+        boards = [HIDDEN_EMOJI * COMBO_SIZE] * NUM_COMBOS
         board_str = SPACER_EMOJI.join(boards)
     return (board_str, mask_str)
 
@@ -221,19 +221,19 @@ async def set_entry_command(ctx, *args):
     chars = [c for sublist in chars for c in sublist]
     chars = list(filter(str.isalpha, chars))
 
-    if len(chars) != NUM_BOARDS * BOARD_SIZE:
-        await error_reply(ctx, f'Entry is invalid: must have {NUM_BOARDS} boards of {BOARD_SIZE}')
+    if len(chars) != NUM_COMBOS * COMBO_SIZE:
+        await error_reply(ctx, f'Entry is invalid: must have {NUM_COMBOS} boards of {COMBO_SIZE}')
         return
 
     # need to ensure all indices 1 to n are featured exactly once
     entry_order = []
-    for i in range(0, NUM_BOARDS * BOARD_SIZE, BOARD_SIZE):
-        board = sorted(list(map(char_to_index, chars[i:i + BOARD_SIZE])))
+    for i in range(0, NUM_COMBOS * COMBO_SIZE, COMBO_SIZE):
+        board = sorted(list(map(char_to_index, chars[i:i + COMBO_SIZE])))
         if board != sorted(list(set(board))):
-            await error_reply(ctx, f'Multi {i // BOARD_SIZE + 1} is invalid: events in a board must be unique')
+            await error_reply(ctx, f'Multi {i // COMBO_SIZE + 1} is invalid: events in a board must be unique')
             return
         if max(board) >= len(game.events):
-            await error_reply(ctx, f'Multi {i // BOARD_SIZE + 1} is invalid: event indices must be between A-{index_to_char(len(game.events) - 1)}')
+            await error_reply(ctx, f'Multi {i // COMBO_SIZE + 1} is invalid: event indices must be between A-{index_to_char(len(game.events) - 1)}')
             return
         entry_order.extend(board)
 

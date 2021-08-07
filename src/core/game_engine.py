@@ -51,9 +51,7 @@ class GameEngine:
         for event in events:
             if event.is_hit:
                 return GameEngineResponse(
-                    display_error='Cannot add/change entry as events have already been hit')
-
-        self.player_repo.delete_entry(game.game_id, player_id)
+                    display_error='Cannot add/change entry as events have already been hit.')
 
         combos = []
         for combo_index, event_indices in enumerate(combo_set_indices):
@@ -61,7 +59,10 @@ class GameEngine:
                 combos.append(Combo([events[i]
                               for i in event_indices], combo_index))
             except IndexError:
-                return GameEngineResponse(display_error='Invalid event index.')
+                return GameEngineResponse(
+                    display_error=f'Combo {combo_index+1} is invalid: Invalid event index.')
+
+        self.player_repo.delete_entry(game.game_id, player_id)
         combo_set = ComboSet(player_id, combos)
 
         self.player_repo.create_entry(game.game_id, combo_set)
@@ -149,15 +150,17 @@ class GameEngine:
                 display_error='No game is currently running.')
 
         entry = self.player_repo.read_entry(game.game_id, player_id)
+        if entry is None:
+            return GameEngineResponse(display_error='You are not in the game.')
         if entry.time_won is not None:
-            return GameEngineResponse(display_error='Entry has already won.')
+            return GameEngineResponse(display_error='Your entry has already won.')
 
         combo_set = self.player_repo.read_combo_set(game.game_id, player_id)
         if combo_set.has_won():
             entry.time_won = datetime.now()
             self.player_repo.update_entry(entry)
         else:
-            return GameEngineResponse(display_error='Entry has not yet won.')
+            return GameEngineResponse(display_error='Your entry has not yet won.')
         return GameEngineResponse()
 
     def view_events(self, server_id: str) -> None:

@@ -6,8 +6,8 @@ UNHIT_EMOJI = '🔴'
 SPACER_EMOJI = '▪️'
 HIDDEN_EMOJI = '❔'
 
-NUM_BOARDS = 4
-BOARD_SIZE = 3
+NUM_COMBOS = 4
+COMBO_SIZE = 3
 
 
 def index_to_char(i):
