@@ -38,7 +38,12 @@ class GameEngine:
 
         game.time_finished = datetime.now()
         self.game_repo.update_game(game)
-        return GameEngineResponse()
+
+        entries = self.player_repo.read_all_entries(game.game_id)
+        entries = list(filter(lambda x: x.time_won is not None, entries))
+        entries.sort(key=lambda x: x.time_won)
+        events = self.event_repo.read_all_events(game.game_id)
+        return GameEngineResponse({'entries': entries, 'events': events})
 
     def set_entry(self, server_id: str, player_id: str,
                   combo_set_indices: List[List[int]]) -> GameEngineResponse:
@@ -69,7 +74,7 @@ class GameEngine:
         return GameEngineResponse()
 
     def _search_event(self, game_id, *, index: Optional[int],
-                      desc: Optional[str]) -> Event:
+                      desc: Optional[str]) -> GameEngineResponse:
         if index is not None:
             hit_event = self.event_repo.read_event_by_index(
                 game_id, index)
@@ -97,7 +102,7 @@ class GameEngine:
         return GameEngineResponse({'event': hit_event})
 
     def hit(self, server_id: str, *, index: int = None, desc: str = None) \
-            -> None:
+            -> GameEngineResponse:
         game = self.game_repo.read_active_game(server_id)
         if game is None:
             return GameEngineResponse(
@@ -116,7 +121,7 @@ class GameEngine:
         return GameEngineResponse({'event': hit_event})
 
     def unhit(self, server_id: str, *, index: int = None, desc: str = None) \
-            -> None:
+            -> GameEngineResponse:
         game = self.game_repo.read_active_game(server_id)
         if game is None:
             return GameEngineResponse(
@@ -134,16 +139,16 @@ class GameEngine:
 
         # some players may have lost their win consequently
         combo_sets = self.player_repo.read_all_combo_sets(game.game_id)
+        entries = self.player_repo.read_all_entries(game.game_id)
+        entry_by_player_id = {entry.player_id: entry for entry in entries}
         for combo_set in combo_sets:
-            # TODO: optimise this
-            entry = self.player_repo.read_entry(game.game_id,
-                                                combo_set.player_id)
+            entry = entry_by_player_id[combo_set.player_id]
             if entry.time_won is not None and not combo_set.has_won():
                 entry.time_won = None
                 self.player_repo.update_entry(entry)
         return GameEngineResponse({'event': unhit_event})
 
-    def bingo(self, server_id: str, player_id: str) -> None:
+    def bingo(self, server_id: str, player_id: str) -> GameEngineResponse:
         game = self.game_repo.read_active_game(server_id)
         if game is None:
             return GameEngineResponse(
@@ -163,7 +168,7 @@ class GameEngine:
             return GameEngineResponse(display_error='Your entry has not yet won.')
         return GameEngineResponse()
 
-    def view_events(self, server_id: str) -> None:
+    def view_events(self, server_id: str) -> GameEngineResponse:
         game = self.game_repo.read_active_game(server_id)
         if game is None:
             return GameEngineResponse(
@@ -172,5 +177,5 @@ class GameEngine:
         events = self.event_repo.read_all_events(game.game_id)
         return GameEngineResponse({'events': events})
 
-    def view_progress(self, server_id: str) -> None:
+    def view_progress(self, server_id: str) -> GameEngineResponse:
         pass

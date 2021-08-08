@@ -23,6 +23,10 @@ class IPlayerRepo(ABC):
         pass
 
     @abstractmethod
+    def read_all_entries(self, game_id: str) -> List[Entry]:
+        pass
+
+    @abstractmethod
     def update_entry(self, entry: Entry) -> None:
         pass
 
