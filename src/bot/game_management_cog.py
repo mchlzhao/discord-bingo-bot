@@ -1,7 +1,8 @@
 from discord.ext import commands
 
 from src.bot.common_cog import CommonCog
-from src.bot.util import to_ordinal_with_podium_emoji, COMBO_SIZE, NUM_COMBOS
+from src.bot.util import (
+    to_ordinal_with_podium_emoji, COMBO_SIZE, NUM_COMBOS, MAX_EVENTS)
 from src.core.game_engine import GameEngine
 
 
@@ -14,13 +15,13 @@ class GameManagementCog(commands.Cog, CommonCog):
                       aliases=['start', 'game.begin', 'begin'])
     async def start_game(self, ctx, *args):
         event_strs = args
-        if len(event_strs) > 26:
-            await self.display_error_response(
-                ctx, 'There can only be up to 26 events.')
+        if len(event_strs) > MAX_EVENTS:
+            await self.display_error_reply(
+                ctx, f'There can only be up to {MAX_EVENTS} events.')
             return
         response = self.engine.start_game(ctx.guild.id, event_strs)
         if response.display_error is not None:
-            await self.display_error_response(ctx, response.display_error)
+            await self.display_error_reply(ctx, response.display_error)
             return
         embed = self.custom_embed(
             '🎲 Game has Started!',
@@ -35,7 +36,7 @@ class GameManagementCog(commands.Cog, CommonCog):
         # TODO: present confirmation prompt
         response = self.engine.finish_game(ctx.guild.id)
         if response.display_error is not None:
-            await self.display_error_response(ctx, response.display_error)
+            await self.display_error_reply(ctx, response.display_error)
             return
 
         # TODO: show podium, final events and progress

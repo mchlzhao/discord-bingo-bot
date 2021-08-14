@@ -21,7 +21,7 @@ class EventHittingCog(commands.Cog, CommonCog):
         else:
             response = self.engine.hit(server_id, desc=search_str)
         if response.display_error is not None:
-            await self.display_error_response(ctx, response.display_error)
+            await self.display_error_reply(ctx, response.display_error)
             return
         event = response.response['event']
         embed = self.custom_embed(
@@ -40,7 +40,7 @@ class EventHittingCog(commands.Cog, CommonCog):
         else:
             response = self.engine.unhit(server_id, desc=search_str)
         if response.display_error is not None:
-            await self.display_error_response(ctx, response.display_error)
+            await self.display_error_reply(ctx, response.display_error)
             return
         event = response.response['event']
         embed = self.custom_embed(

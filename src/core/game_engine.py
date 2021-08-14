@@ -4,9 +4,6 @@ from typing import List, Optional
 from src.core.game_engine_response import GameEngineResponse
 from src.entities.combo import Combo
 from src.entities.combo_set import ComboSet
-from src.entities.entry import Entry
-from src.entities.event import Event
-from src.entities.game import Game
 from src.repos.abstract.ievent_repo import IEventRepo
 from src.repos.abstract.igame_repo import IGameRepo
 from src.repos.abstract.iplayer_repo import IPlayerRepo
@@ -40,8 +37,8 @@ class GameEngine:
         self.game_repo.update_game(game)
 
         entries = self.player_repo.read_all_entries(game.game_id)
-        entries = list(filter(lambda x: x.time_won is not None, entries))
-        entries.sort(key=lambda x: x.time_won)
+        entries = list(filter(lambda e: e.time_won is not None, entries))
+        entries.sort(key=lambda e: e.time_won)
         events = self.event_repo.read_all_events(game.game_id)
         return GameEngineResponse({'entries': entries, 'events': events})
 
@@ -53,10 +50,9 @@ class GameEngine:
                 display_error='No game is currently running.')
 
         events = self.event_repo.read_all_events(game.game_id)
-        for event in events:
-            if event.is_hit:
-                return GameEngineResponse(
-                    display_error='Cannot add/change entry as events have already been hit.')
+        if any([event.is_hit for event in events]):
+            return GameEngineResponse(display_error=(
+                'Cannot add/change entry as events have already been hit.'))
 
         combos = []
         for combo_index, event_indices in enumerate(combo_set_indices):
@@ -64,8 +60,8 @@ class GameEngine:
                 combos.append(Combo([events[i]
                               for i in event_indices], combo_index))
             except IndexError:
-                return GameEngineResponse(
-                    display_error=f'Combo {combo_index+1} is invalid: Invalid event index.')
+                return GameEngineResponse(display_error=(
+                    f'Combo {combo_index+1} is invalid: Invalid event index.'))
 
         self.player_repo.delete_entry(game.game_id, player_id)
         combo_set = ComboSet(player_id, combos)
@@ -84,7 +80,8 @@ class GameEngine:
             hit_events = self.event_repo.read_events_by_desc(
                 game_id, desc)
             if len(hit_events) == 0:
-                return GameEngineResponse(display_error='No event description matches search string.')
+                return GameEngineResponse(display_error=(
+                    'No event description matches search string.'))
             elif len(hit_events) > 1:
                 error_str = (
                     'More than one event description matches search string.\n'
@@ -158,14 +155,16 @@ class GameEngine:
         if entry is None:
             return GameEngineResponse(display_error='You are not in the game.')
         if entry.time_won is not None:
-            return GameEngineResponse(display_error='Your entry has already won.')
+            return GameEngineResponse(
+                display_error='Your entry has already won.')
 
         combo_set = self.player_repo.read_combo_set(game.game_id, player_id)
         if combo_set.has_won():
             entry.time_won = datetime.now()
             self.player_repo.update_entry(entry)
         else:
-            return GameEngineResponse(display_error='Your entry has not yet won.')
+            return GameEngineResponse(
+                display_error='Your entry has not yet won.')
         return GameEngineResponse()
 
     def view_events(self, server_id: str) -> GameEngineResponse:
@@ -178,4 +177,13 @@ class GameEngine:
         return GameEngineResponse({'events': events})
 
     def view_progress(self, server_id: str) -> GameEngineResponse:
-        pass
+        game = self.game_repo.read_active_game(server_id)
+        if game is None:
+            return GameEngineResponse(
+                display_error='No game is currently running.')
+
+        combo_sets = self.player_repo.read_all_combo_sets(game.game_id)
+        events = self.event_repo.read_all_events(game.game_id)
+        has_started = any([event.is_hit for event in events])
+        return GameEngineResponse({'combo_sets': combo_sets,
+                                   'game_has_started': has_started})

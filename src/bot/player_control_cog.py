@@ -20,7 +20,7 @@ class PlayerControlCog(commands.Cog, CommonCog):
         event_indices = list(map(char_to_index, event_index_chars))
 
         if len(event_indices) != NUM_COMBOS * COMBO_SIZE:
-            await self.display_error_response(
+            await self.display_error_reply(
                 ctx,
                 f'Entry is invalid: must have {NUM_COMBOS} boards of {COMBO_SIZE}')
             return
@@ -29,7 +29,7 @@ class PlayerControlCog(commands.Cog, CommonCog):
         for i in range(0, NUM_COMBOS * COMBO_SIZE, COMBO_SIZE):
             combo_indices = sorted(event_indices[i:i + COMBO_SIZE])
             if combo_indices != sorted(list(set(combo_indices))):
-                await self.display_error_response(
+                await self.display_error_reply(
                     ctx, f'Combo {i // COMBO_SIZE + 1} is invalid: Events must be unique.')
                 return
             combos.append(combo_indices)
@@ -38,7 +38,7 @@ class PlayerControlCog(commands.Cog, CommonCog):
         response = self.engine.set_entry(
             ctx.guild.id, str(ctx.author.id), combos)
         if response.display_error is not None:
-            await self.display_error_response(ctx, response.display_error)
+            await self.display_error_reply(ctx, response.display_error)
             return
         await ctx.message.add_reaction(SUCCESS_EMOJI)
 
@@ -47,14 +47,15 @@ class PlayerControlCog(commands.Cog, CommonCog):
         # TODO: add user cooldown
         response = self.engine.bingo(ctx.guild.id, str(ctx.author.id))
         if response.display_error is not None:
-            await self.display_error_response(ctx, response.display_error)
+            await self.display_error_reply(ctx, response.display_error)
             return
         embed = self.custom_embed(
             '🏆 🥳 🎉 Bingo!',
             f'<@{ctx.author.id}> has just won!'
         )
+        # TODO: show the winning board
         await ctx.send(embed=embed)
 
     @commands.command(name='bingo', aliases=['bingo!', 'BINGO'])
     async def no_bingo(self, ctx):
-        await self.display_error_response(ctx, 'Say it louder! "BINGO!"')
+        await self.display_error_reply(ctx, 'Say it louder! "BINGO!"')

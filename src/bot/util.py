@@ -8,6 +8,7 @@ HIDDEN_EMOJI = '❔'
 
 NUM_COMBOS = 4
 COMBO_SIZE = 3
+MAX_EVENTS = 26
 
 
 def index_to_char(i):
