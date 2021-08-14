@@ -24,7 +24,7 @@ class GameManagementCog(commands.Cog, CommonCog):
             await self.display_error_reply(ctx, response.display_error)
             return
         embed = self.custom_embed(
-            '🎲 Game has Started!',
+            '🚀 Game has Started!',
             f'Choose {NUM_COMBOS} combos of {COMBO_SIZE} events from the following:',
             self.events_to_fields(response.response['events'], False)
         )

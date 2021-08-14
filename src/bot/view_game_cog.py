@@ -17,7 +17,7 @@ class ViewGameCog(commands.Cog, CommonCog):
             await self.display_error_reply(ctx, response.display_error)
             return
         embed = self.custom_embed(
-            'List of Events', None,
+            '🎲 List of Events', None,
             self.events_to_fields(response.response['events'], True)
         )
         await ctx.send(embed=embed)
@@ -49,7 +49,7 @@ class ViewGameCog(commands.Cog, CommonCog):
         else:
             desc = None
         embed = self.custom_embed(
-            'Player Progress', desc,
+            '🎲 Player Progress', desc,
             fields,
             inline=False
         )
