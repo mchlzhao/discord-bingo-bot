@@ -10,7 +10,7 @@ class PlayerControlCog(commands.Cog, CommonCog):
         self.bot = bot
         self.engine = engine
 
-    @commands.command(name='set_entry')
+    @commands.command(name='set_entry', aliases=['set', 'entry'])
     async def set_entry(self, ctx, *args):
         # flatten all args into a single list of chars
         event_index_chars = [c for sublist in map(list, args) for c in sublist]
@@ -42,7 +42,6 @@ class PlayerControlCog(commands.Cog, CommonCog):
             return
         await ctx.message.add_reaction(SUCCESS_EMOJI)
 
-    # TODO: set commands for 'bingo' and 'bingo!'
     @commands.command(name='BINGO!')
     async def bingo(self, ctx):
         # TODO: add user cooldown
@@ -55,3 +54,7 @@ class PlayerControlCog(commands.Cog, CommonCog):
             f'<@{ctx.author.id}> has just won!'
         )
         await ctx.send(embed=embed)
+
+    @commands.command(name='bingo', aliases=['bingo!', 'BINGO'])
+    async def no_bingo(self, ctx):
+        await self.display_error_response(ctx, 'Say it louder! "BINGO!"')

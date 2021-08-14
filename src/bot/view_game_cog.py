@@ -9,7 +9,7 @@ class ViewGameCog(commands.Cog, CommonCog):
         self.bot = bot
         self.engine = engine
 
-    @commands.command(name='view.events')
+    @commands.command(name='view.events', aliases=['events'])
     async def view_events(self, ctx, *args):
         response = self.engine.view_events(ctx.guild.id)
         if response.display_error is not None:
@@ -21,7 +21,7 @@ class ViewGameCog(commands.Cog, CommonCog):
         )
         await ctx.send(embed=embed)
 
-    @ commands.command(name='view.progress')
+    @commands.command(name='view.progress', aliases=['progress'])
     async def view_progress(self, ctx, *args):
         print(f'finishing game server_id = {ctx.guild.id}')
         response = self.engine.finish_game(ctx.guild.id)
