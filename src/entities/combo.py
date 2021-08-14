@@ -9,4 +9,4 @@ class Combo:
         self.index = index
 
     def has_won(self):
-        return all(map(lambda x: x.is_hit, self.events))
+        return all(map(lambda event: event.is_hit, self.events))

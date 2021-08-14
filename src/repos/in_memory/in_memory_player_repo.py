@@ -12,13 +12,9 @@ class InMemoryPlayerRepo(IPlayerRepo):
         self.next_entry_id = 0
 
     def create_entry(self, game_id: str, combo_set: ComboSet) -> None:
-        if game_id not in self.data_store.entries:
-            self.data_store.entries[game_id] = {}
         self.next_entry_id += 1
         self.data_store.entries[game_id][combo_set.player_id] = \
             Entry(self.next_entry_id, game_id, combo_set.player_id, None)
-        if game_id not in self.data_store.combo_sets:
-            self.data_store.combo_sets[game_id] = {}
         self.data_store.combo_sets[game_id][combo_set.player_id] = combo_set
 
     def read_combo_set(self, game_id: str, player_id: str) -> ComboSet:
@@ -29,7 +25,10 @@ class InMemoryPlayerRepo(IPlayerRepo):
                 for combo_set in self.data_store.combo_sets[game_id].values()]
 
     def read_entry(self, game_id: str, player_id: str) -> Optional[Entry]:
-        return self.data_store.entries[game_id][player_id]
+        return self.data_store.entries[game_id].get(player_id, None)
+
+    def read_all_entries(self, game_id: str) -> List[Entry]:
+        return self.data_store.entries[game_id].values()
 
     def update_entry(self, entry: Entry) -> None:
         self.data_store.entries[entry.game_id][entry.player_id] = entry

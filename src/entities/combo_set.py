@@ -9,4 +9,4 @@ class ComboSet:
         self.combos = combos
 
     def has_won(self):
-        return any(map(lambda x: x.has_won(), self.combos))
+        return any(map(lambda combo: combo.has_won(), self.combos))

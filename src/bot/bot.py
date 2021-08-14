@@ -1,8 +1,6 @@
 import discord
 from discord.ext import commands
 
-from core.Game import Game
-
 SUCCESS_EMOJI = '👍'
 FAILURE_EMOJI = '👎'
 ERROR_EMOJI = '❌'
@@ -11,50 +9,60 @@ UNHIT_EMOJI = '🔴'
 SPACER_EMOJI = '▪️'
 HIDDEN_EMOJI = '❔'
 
-NUM_BOARDS = 4
-BOARD_SIZE = 3
+NUM_COMBOS = 4
+COMBO_SIZE = 3
 
 FROM_DAT = True
+
 
 def char_to_emoji(c):
     return f':regional_indicator_{c.lower()}:'
 
+
 def str_to_emoji(s):
     return ''.join(map(char_to_emoji, s))
+
 
 def index_to_char(i):
     return chr(ord('A') + i)
 
+
 def char_to_index(c):
     return ord(c) - ord('A')
+
 
 def index_to_emoji(i):
     return char_to_emoji(index_to_char(i))
 
+
 def indices_to_emoji(l):
     return ''.join(map(index_to_emoji, l))
+
 
 def bool_to_emoji(b):
     return HIT_EMOJI if b else UNHIT_EMOJI
 
+
 def mask_to_emoji(m):
     return ''.join(map(bool_to_emoji, m))
+
 
 def get_name(member):
     return member.nick or member.name
 
 
-
 bot = commands.Bot(command_prefix='<>', help_command=None)
 game = None
 
+
+'''
 @bot.event
 async def on_ready():
     global game
     print('Bot ready')
     game = Game('Test Game', None)
     if FROM_DAT:
-        with open('data/events.dat', 'r') as events_file:                
+        with open('data/events.dat', 'r') as events_file:
             already_hit = []
             event_strs = []
             for line in events_file:
@@ -73,7 +81,7 @@ async def on_ready():
                 player_id = tokens[0]
                 entry = list(map(int, tokens[1:]))
                 game.set_player(player_id, entry)
-        
+
         for i in already_hit:
             game.hit(i)
     else:
@@ -82,20 +90,25 @@ async def on_ready():
             '> Down the inside/round the outside',
             'MazesBin DNFs'
         ] + [f'Event {i}' for i in range(4, 11)])
-        game.set_player(740728443611775006, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2])
-        game.set_player(741134158247755886, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2])
-        game.set_player(865037902529953793, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2])
+        game.set_player(740728443611775006, [
+                        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2])
+        game.set_player(741134158247755886, [
+                        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2])
+        game.set_player(865037902529953793, [
+                        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2])
+
 
 @bot.command(name='test')
 async def test_command(ctx):
     await ctx.message.add_reaction(SUCCESS_EMOJI)
+
 
 @bot.command(name='help')
 async def help(ctx):
     embed = discord.Embed(title='Bingo Bot Help:')
     embed.add_field(
         name='<>set_entry [ABC DEF GHI JKL]',
-        value=f'Assign {NUM_BOARDS} combos of {BOARD_SIZE} events each. If all {BOARD_SIZE} events occur in any combo, you win. Each event cannot be repeated in a combo, but can be in more than one combo. Entry can be freely changed as long as no event has been hit.',
+        value=f'Assign {NUM_COMBOS} combos of {COMBO_SIZE} events each. If all {COMBO_SIZE} events occur in any combo, you win. Each event cannot be repeated in a combo, but can be in more than one combo. Entry can be freely changed as long as no event has been hit.',
         inline=False
     )
     embed.add_field(
@@ -121,7 +134,6 @@ async def help(ctx):
     await ctx.message.reply(embed=embed)
 
 
-
 @bot.command(name='view_events')
 async def view_events(ctx):
     embed = discord.Embed(title='List of Events:')
@@ -134,6 +146,7 @@ async def view_events(ctx):
 
 progress_embed = None
 
+
 def get_player_progress(player_id):
     entry = game.players[player_id]
     masks = entry.get_masks(game.events_hit_dict)
@@ -142,9 +155,10 @@ def get_player_progress(player_id):
         boards = [board.board_order for board in entry.boards]
         board_str = SPACER_EMOJI.join(map(indices_to_emoji, boards))
     else:
-        boards = [HIDDEN_EMOJI * BOARD_SIZE] * NUM_BOARDS
+        boards = [HIDDEN_EMOJI * COMBO_SIZE] * NUM_COMBOS
         board_str = SPACER_EMOJI.join(boards)
     return (board_str, mask_str)
+
 
 @bot.command(name='view_progress')
 async def view_progress(ctx, *args):
@@ -160,7 +174,6 @@ async def view_progress(ctx, *args):
                 inline=False
             )
     await ctx.send(embed=progress_embed)
-
 
 
 def save_game_to_file():
@@ -181,19 +194,20 @@ def save_game_to_file():
             )
 
 
-
 def labelled_message(label, message, emoji=None):
     if emoji:
         return f'{emoji} {label}: {message}'
     return f'{label}: {message}'
 
+
 def embed_title(title, emoji):
     return f'{emoji} {title} {emoji}'
 
-async def error_reply(ctx, error_message):
-    embed = discord.Embed(title=embed_title('Error', ERROR_EMOJI), description=error_message)
-    await ctx.message.reply(embed=embed)
 
+async def error_reply(ctx, error_message):
+    embed = discord.Embed(title=embed_title(
+        'Error', ERROR_EMOJI), description=error_message)
+    await ctx.message.reply(embed=embed)
 
 
 @bot.command(name='set_entry')
@@ -206,20 +220,20 @@ async def set_entry_command(ctx, *args):
     chars = map(lambda x: [y for y in x], args)
     chars = [c for sublist in chars for c in sublist]
     chars = list(filter(str.isalpha, chars))
-    
-    if len(chars) != NUM_BOARDS * BOARD_SIZE:
-        await error_reply(ctx, f'Entry is invalid: must have {NUM_BOARDS} boards of {BOARD_SIZE}')
+
+    if len(chars) != NUM_COMBOS * COMBO_SIZE:
+        await error_reply(ctx, f'Entry is invalid: must have {NUM_COMBOS} boards of {COMBO_SIZE}')
         return
 
     # need to ensure all indices 1 to n are featured exactly once
     entry_order = []
-    for i in range(0, NUM_BOARDS * BOARD_SIZE, BOARD_SIZE):
-        board = sorted(list(map(char_to_index, chars[i:i + BOARD_SIZE])))
+    for i in range(0, NUM_COMBOS * COMBO_SIZE, COMBO_SIZE):
+        board = sorted(list(map(char_to_index, chars[i:i + COMBO_SIZE])))
         if board != sorted(list(set(board))):
-            await error_reply(ctx, f'Multi {i // BOARD_SIZE + 1} is invalid: events in a board must be unique')
+            await error_reply(ctx, f'Multi {i // COMBO_SIZE + 1} is invalid: events in a board must be unique')
             return
         if max(board) >= len(game.events):
-            await error_reply(ctx, f'Multi {i // BOARD_SIZE + 1} is invalid: event indices must be between A-{index_to_char(len(game.events) - 1)}')
+            await error_reply(ctx, f'Multi {i // COMBO_SIZE + 1} is invalid: event indices must be between A-{index_to_char(len(game.events) - 1)}')
             return
         entry_order.extend(board)
 
@@ -230,13 +244,13 @@ async def set_entry_command(ctx, *args):
     save_game_to_file()
 
 
-
 def search_events(s):
     matches = []
     for event in game.events:
         if s.lower() in event.desc.lower():
             matches.append(event)
     return matches
+
 
 async def generic_hit(ctx, search_string):
     search_results = search_events(search_string)
@@ -258,6 +272,7 @@ async def generic_hit(ctx, search_string):
         await error_reply(ctx, error_str)
         return None
     return search_results[0]
+
 
 @bot.command(name='hit')
 async def hit(ctx, *args):
@@ -285,6 +300,7 @@ async def hit(ctx, *args):
         await ctx.send(embed=embed)
     save_game_to_file()
 
+
 @bot.command(name='unhit')
 async def unhit(ctx, *args):
     search_string = ' '.join(args)
@@ -303,3 +319,5 @@ async def unhit(ctx, *args):
     )
     await ctx.send(embed=embed)
     save_game_to_file()
+
+'''

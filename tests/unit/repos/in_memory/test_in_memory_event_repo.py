@@ -12,7 +12,7 @@ class TestInMemoryEventRepo(unittest.TestCase):
         self.game_id = 'test_game'
         self.events = [Event(f'event{i}', i, False) for i in range(11)]
         self.event_repo.create_events(self.game_id,
-                                      list(map(lambda x: x.desc, self.events)))
+                                      list(map(lambda e: e.desc, self.events)))
 
     def assertEventsEqual(self, e1: Event, e2: Event):
         self.assertEqual(e1.desc, e2.desc)
