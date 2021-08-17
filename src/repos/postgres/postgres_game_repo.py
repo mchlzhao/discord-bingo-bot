@@ -1,9 +1,10 @@
 from typing import Optional
 
 from src.entities.game import Game
+from src.repos.abstract.igame_repo import IGameRepo
 
 
-class PostgresGameRepo:
+class PostgresGameRepo(IGameRepo):
     def create_game(self, server_id: str) -> Game:
         pass
 
