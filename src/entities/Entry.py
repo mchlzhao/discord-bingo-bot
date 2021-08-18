@@ -2,7 +2,7 @@ from datetime import datetime
 
 
 class Entry:
-    def __init__(self, entry_id: str, game_id: str, player_id: str,
+    def __init__(self, entry_id: str, game_id: int, player_id: str,
                  time_won: datetime):
         self.entry_id = entry_id
         self.game_id = game_id

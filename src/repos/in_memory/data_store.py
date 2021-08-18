@@ -18,7 +18,7 @@ class DataStore:
 
     def _sample_event(self):
         game_id = '1'
-        self.events[game_id] = [Event('e0', 0, False)]
+        self.events[game_id] = [Event(None, game_id, 'e0', 0, False)]
 
     def _sample_entry(self):
         game_id = '1'
