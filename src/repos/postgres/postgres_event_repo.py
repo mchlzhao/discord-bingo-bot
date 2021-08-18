@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List
 
 from src.entities.event import Event
 from src.repos.abstract.ievent_repo import IEventRepo
@@ -33,13 +33,6 @@ class PostgresEventRepo(IEventRepo):
         cur = self.conn.cursor()
         cur.execute(query, (game_id, ))
         return [Event(*data) for data in cur.fetchall()]
-
-    def read_event_by_index(self, game_id: int, index: int) -> Optional[Event]:
-        pass
-
-    def read_events_by_desc(self, game_id: int,
-                            desc_search_str: str) -> List[Event]:
-        pass
 
     def update_event(self, game_id: int, event: Event) -> None:
         query = '''UPDATE GameEvent
