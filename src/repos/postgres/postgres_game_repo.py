@@ -29,6 +29,8 @@ class PostgresGameRepo(IGameRepo):
         cur = self.conn.cursor()
         cur.execute(query, data)
         result = cur.fetchone()
+        if result is None:
+            return None
         return Game(*result)
 
     def update_game(self, game: Game) -> None:
