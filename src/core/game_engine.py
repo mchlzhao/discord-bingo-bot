@@ -57,11 +57,12 @@ class GameEngine:
         combos = []
         for combo_index, event_indices in enumerate(combo_set_indices):
             try:
-                combos.append(Combo([events[i]
-                              for i in event_indices], combo_index))
+                combos.append(Combo(None, [events[i]
+                                           for i in event_indices],
+                                    combo_index))
             except IndexError:
                 return GameEngineResponse(display_error=(
-                    f'Combo {combo_index+1} is invalid: Invalid event index.'))
+                    f'Combo {combo_index + 1} is invalid: Invalid event index.'))
 
         self.player_repo.delete_entry(game.game_id, player_id)
         combo_set = ComboSet(player_id, combos)

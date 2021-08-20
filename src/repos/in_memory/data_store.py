@@ -30,4 +30,4 @@ class DataStore:
         game_id = '1'
         player_id = 'player_id'
         self.combo_sets[game_id][player_id] = \
-            ComboSet(player_id, [Combo(None, 0)])
+            ComboSet(player_id, [Combo(None, None, 0)])

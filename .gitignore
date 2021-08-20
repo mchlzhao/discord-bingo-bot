@@ -5,3 +5,4 @@ env/
 *.dat
 .DS_Store
 .vscode
+.idea

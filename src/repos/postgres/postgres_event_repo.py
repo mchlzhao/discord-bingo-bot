@@ -12,7 +12,7 @@ class PostgresEventRepo(IEventRepo):
             -> List[Event]:
         query = '''INSERT INTO GameEvent
                    (game_id, event_desc, index_in_game, is_hit)
-                   VALUES '''
+                   VALUES'''
         event_tups = [(game_id, desc, index)
                       for index, desc in enumerate(event_strs)]
         cur = self.conn.cursor()
@@ -31,7 +31,7 @@ class PostgresEventRepo(IEventRepo):
                    FROM GameEvent
                    WHERE game_id = %s'''
         cur = self.conn.cursor()
-        cur.execute(query, (game_id, ))
+        cur.execute(query, (game_id,))
         return [Event(*data) for data in cur.fetchall()]
 
     def update_event(self, game_id: int, event: Event) -> None:

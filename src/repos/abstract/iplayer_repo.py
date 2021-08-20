@@ -11,7 +11,8 @@ class IPlayerRepo(ABC):
         pass
 
     @abstractmethod
-    def read_combo_set(self, game_id: int, player_id: str) -> ComboSet:
+    def read_combo_set(self, game_id: int, player_id: str) \
+            -> Optional[ComboSet]:
         pass
 
     @abstractmethod
