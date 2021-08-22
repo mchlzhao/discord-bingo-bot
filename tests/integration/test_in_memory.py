@@ -1,6 +1,5 @@
 import unittest
 
-from src.core.displayable_error import DisplayableError
 from src.core.game_engine import GameEngine
 from src.repos.in_memory.data_store import DataStore
 from src.repos.in_memory.in_memory_event_repo import InMemoryEventRepo
@@ -47,12 +46,13 @@ class TestInMemoryIntegration(unittest.TestCase):
         self.game_engine.set_entry(self.server_id, self.player_id,
                                    [[0, 1, 2], [3, 4, 5]])
         self.game_engine.hit(self.server_id, index=0)
-        self.assertRaises(
-            DisplayableError,
-            self.game_engine.bingo, self.server_id, self.player_id)
+        response = self.game_engine.bingo(self.server_id, self.player_id)
+        self.assertIsNotNone(response.display_error)
+
         self.game_engine.hit(self.server_id, index=1)
-        self.assertRaises(
-            DisplayableError,
-            self.game_engine.bingo, self.server_id, self.player_id)
+        response = self.game_engine.bingo(self.server_id, self.player_id)
+        self.assertIsNotNone(response.display_error)
+
         self.game_engine.hit(self.server_id, index=2)
-        self.game_engine.bingo(self.server_id, self.player_id)
+        response = self.game_engine.bingo(self.server_id, self.player_id)
+        self.assertIsNone(response.display_error)

@@ -57,11 +57,13 @@ class GameEngine:
         combos = []
         for combo_index, event_indices in enumerate(combo_set_indices):
             try:
-                combos.append(Combo([events[i]
-                              for i in event_indices], combo_index))
+                combos.append(Combo(None, [events[i]
+                                           for i in event_indices],
+                                    combo_index))
             except IndexError:
                 return GameEngineResponse(display_error=(
-                    f'Combo {combo_index+1} is invalid: Invalid event index.'))
+                    f'Combo {combo_index + 1} is invalid: Invalid event index.'
+                ))
 
         self.player_repo.delete_entry(game.game_id, player_id)
         combo_set = ComboSet(player_id, combos)
@@ -71,14 +73,16 @@ class GameEngine:
 
     def _search_event(self, game_id, *, index: Optional[int],
                       desc: Optional[str]) -> GameEngineResponse:
+        events = self.event_repo.read_all_events(game_id)
         if index is not None:
-            hit_event = self.event_repo.read_event_by_index(
-                game_id, index)
-            if hit_event is None:
+            events.sort(key=lambda event: event.index)
+            try:
+                hit_event = events[index]
+            except IndexError:
                 return GameEngineResponse(display_error='Invalid event index.')
-        elif desc is not None:
-            hit_events = self.event_repo.read_events_by_desc(
-                game_id, desc)
+            return GameEngineResponse({'event': hit_event})
+        if desc is not None:
+            hit_events = list(filter(lambda event: desc in event.desc, events))
             if len(hit_events) == 0:
                 return GameEngineResponse(display_error=(
                     'No event description matches search string.'))
@@ -93,10 +97,8 @@ class GameEngine:
                     error_str += '\n...'
                 return GameEngineResponse(display_error=error_str)
             else:
-                hit_event = hit_events[0]
-        else:
-            raise ValueError('No event has been specified.')
-        return GameEngineResponse({'event': hit_event})
+                return GameEngineResponse({'event': hit_events[0]})
+        raise ValueError('No event has been specified.')
 
     def hit(self, server_id: str, *, index: int = None, desc: str = None) \
             -> GameEngineResponse:

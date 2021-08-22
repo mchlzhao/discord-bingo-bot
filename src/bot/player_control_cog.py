@@ -30,13 +30,14 @@ class PlayerControlCog(commands.Cog, CommonCog):
             combo_indices = sorted(event_indices[i:i + COMBO_SIZE])
             if combo_indices != sorted(list(set(combo_indices))):
                 await self.display_error_reply(
-                    ctx, f'Combo {i // COMBO_SIZE + 1} is invalid: Events must be unique.')
+                    ctx,
+                    f'Combo {i // COMBO_SIZE + 1} is invalid: Events must be unique.')
                 return
             combos.append(combo_indices)
         combos.sort()
 
         response = self.engine.set_entry(
-            ctx.guild.id, str(ctx.author.id), combos)
+            str(ctx.guild.id), str(ctx.author.id), combos)
         if response.display_error is not None:
             await self.display_error_reply(ctx, response.display_error)
             return
@@ -45,7 +46,7 @@ class PlayerControlCog(commands.Cog, CommonCog):
     @commands.command(name='BINGO!')
     async def bingo(self, ctx):
         # TODO: add user cooldown
-        response = self.engine.bingo(ctx.guild.id, str(ctx.author.id))
+        response = self.engine.bingo(str(ctx.guild.id), str(ctx.author.id))
         if response.display_error is not None:
             await self.display_error_reply(ctx, response.display_error)
             return
