@@ -30,14 +30,14 @@ create table GameEntry (
 
 create table Combo (
 	combo_id SERIAL not null,
-	entry_id SERIAL not null references GameEntry(entry_id),
+	entry_id SERIAL not null references GameEntry(entry_id) on delete cascade,
 	index_in_entry INT not null,
 	primary key (combo_id),
 	unique (entry_id, index_in_entry)
 );
 
 create table EventInCombo (
-	combo_id SERIAL not null references Combo(combo_id),
+	combo_id SERIAL not null references Combo(combo_id) on delete cascade,
 	event_id SERIAL not null references GameEvent(event_id),
 	index_in_combo INT not null,
 	primary key (combo_id, event_id),

@@ -9,3 +9,6 @@ class Entry:
         self.game_id = game_id
         self.player_id = player_id
         self.time_won = time_won
+
+    def __str__(self):
+        return f'Entry id={self.entry_id}: game={self.game_id} player={self.player_id} time_won={self.time_won}'
