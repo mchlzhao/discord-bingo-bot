@@ -13,7 +13,7 @@ class EventHittingCog(commands.Cog, CommonCog):
 
     @commands.command(name='hit')
     async def hit(self, ctx, *args):
-        server_id = ctx.guild.id
+        server_id = str(ctx.guild.id)
         search_str = ' '.join(args)
         if len(search_str) == 1 and search_str.isalpha():
             response = self.engine.hit(
@@ -32,7 +32,7 @@ class EventHittingCog(commands.Cog, CommonCog):
 
     @commands.command(name='unhit')
     async def unhit(self, ctx, *args):
-        server_id = ctx.guild.id
+        server_id = str(ctx.guild.id)
         search_str = ' '.join(args)
         if len(search_str) == 1 and search_str.isalpha():
             response = self.engine.unhit(

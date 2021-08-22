@@ -11,8 +11,8 @@ class ViewGameCog(commands.Cog, CommonCog):
         self.engine = engine
 
     @commands.command(name='view.events', aliases=['events'])
-    async def view_events(self, ctx, *args):
-        response = self.engine.view_events(ctx.guild.id)
+    async def view_events(self, ctx):
+        response = self.engine.view_events(str(ctx.guild.id))
         if response.display_error is not None:
             await self.display_error_reply(ctx, response.display_error)
             return
@@ -24,7 +24,8 @@ class ViewGameCog(commands.Cog, CommonCog):
 
     @commands.command(name='view.progress', aliases=['progress'])
     async def view_progress(self, ctx, *args):
-        response = self.engine.view_progress(ctx.guild.id)
+        # TODO: view progress for specific players
+        response = self.engine.view_progress(str(ctx.guild.id))
         if response.display_error is not None:
             await self.display_error_reply(ctx, response.display_error)
             return

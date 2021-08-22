@@ -9,7 +9,7 @@ class TestInMemoryEventRepo(unittest.TestCase):
     def setUp(self):
         data_store = DataStore()
         self.event_repo = InMemoryEventRepo(data_store)
-        self.game_id = 'test_game'
+        self.game_id = 1
         self.events = [Event(None, self.game_id, f'event{i}', i, False)
                        for i in range(11)]
         self.event_repo.create_events(self.game_id,

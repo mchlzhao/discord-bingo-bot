@@ -1,6 +1,7 @@
+from typing import List, Tuple, Optional
+
 import discord
 from discord.ext import commands
-from typing import List, Tuple
 
 from src.bot.util import ERROR_EMOJI, SPACER_EMOJI, index_to_emoji, hit_emoji
 from src.entities.combo_set import ComboSet
@@ -8,7 +9,7 @@ from src.entities.event import Event
 
 
 class CommonCog:
-    def custom_embed(self, title: str, desc: str,
+    def custom_embed(self, title: str, desc: Optional[str],
                      fields: List[Tuple[str, str]] = [],
                      inline=True) -> discord.Embed:
         if desc is None:

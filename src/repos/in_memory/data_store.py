@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from src.entities.combo import Combo
 from src.entities.combo_set import ComboSet
 from src.entities.entry import Entry
@@ -13,21 +15,21 @@ class DataStore:
         self.combo_sets = {}
 
     def _sample_game(self):
-        game = Game('1', '1', None, None)
+        game = Game(1, '1', datetime.now(), None)
         self.games[game.game_id] = game
 
     def _sample_event(self):
-        game_id = '1'
+        game_id = 1
         self.events[game_id] = [Event(None, game_id, 'e0', 0, False)]
 
     def _sample_entry(self):
-        game_id = '1'
+        game_id = 1
         player_id = 'player_id'
         self.entries[game_id][player_id] = \
             Entry('entry_id', game_id, 'player_id', None)
 
     def _sample_combo_set(self):
-        game_id = '1'
+        game_id = 1
         player_id = 'player_id'
         self.combo_sets[game_id][player_id] = \
-            ComboSet(player_id, [Combo(None, None, 0)])
+            ComboSet(player_id, [Combo(None, [], 0)])

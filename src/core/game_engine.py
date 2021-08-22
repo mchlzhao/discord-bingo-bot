@@ -62,7 +62,8 @@ class GameEngine:
                                     combo_index))
             except IndexError:
                 return GameEngineResponse(display_error=(
-                    f'Combo {combo_index + 1} is invalid: Invalid event index.'))
+                    f'Combo {combo_index + 1} is invalid: Invalid event index.'
+                ))
 
         self.player_repo.delete_entry(game.game_id, player_id)
         combo_set = ComboSet(player_id, combos)
