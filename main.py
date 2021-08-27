@@ -1,5 +1,6 @@
+import os
+
 import psycopg2
-from decouple import config
 from discord.ext import commands
 
 from src.bot.event_hitting_cog import EventHittingCog
@@ -23,14 +24,9 @@ if USE_IN_MEMORY:
     game_repo = InMemoryGameRepo(data_store)
     player_repo = InMemoryPlayerRepo(data_store)
 else:
-    conn = psycopg2.connect(
-        host='localhost',
-        port=15432,
-        dbname='bingoBot',
-        user='postgres',
-        options='-c search_path="bingo_bot_test"',
-        password=config('POSTGRES_PW')
-    )
+    DATABASE_URL = os.environ['DATABASE_URL']
+    sslmode = 'require' if 'HEROKU' in os.environ else 'disable'
+    conn = psycopg2.connect(DATABASE_URL, sslmode=sslmode)
     event_repo = PostgresEventRepo(conn)
     game_repo = PostgresGameRepo(conn)
     player_repo = PostgresPlayerRepo(conn)
@@ -43,5 +39,5 @@ bot.add_cog(GameManagementCog(bot, engine))
 bot.add_cog(PlayerControlCog(bot, engine))
 bot.add_cog(ViewGameCog(bot, engine))
 
-TOKEN = config('DISCORD_TOKEN')
+TOKEN = os.environ['DISCORD_TOKEN']
 bot.run(TOKEN)
