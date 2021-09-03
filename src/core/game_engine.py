@@ -82,7 +82,8 @@ class GameEngine:
                 return GameEngineResponse(display_error='Invalid event index.')
             return GameEngineResponse({'event': hit_event})
         if desc is not None:
-            hit_events = list(filter(lambda event: desc in event.desc, events))
+            hit_events = list(filter(
+                lambda event: desc.lower() in event.desc.lower(), events))
             if len(hit_events) == 0:
                 return GameEngineResponse(display_error=(
                     'No event description matches search string.'))
