@@ -15,6 +15,10 @@ class EventHittingCog(commands.Cog, CommonCog):
     async def hit(self, ctx, *args):
         server_id = str(ctx.guild.id)
         search_str = ' '.join(args)
+        if len(search_str) == 0:
+            await self.display_error_reply(ctx,
+                                           'No search term has been provided')
+            return
         if len(search_str) == 1 and search_str.isalpha():
             response = self.engine.hit(
                 server_id, index=char_to_index(search_str))
@@ -34,6 +38,10 @@ class EventHittingCog(commands.Cog, CommonCog):
     async def unhit(self, ctx, *args):
         server_id = str(ctx.guild.id)
         search_str = ' '.join(args)
+        if len(search_str) == 0:
+            await self.display_error_reply(ctx,
+                                           'No search term has been provided')
+            return
         if len(search_str) == 1 and search_str.isalpha():
             response = self.engine.unhit(
                 server_id, index=char_to_index(search_str))
