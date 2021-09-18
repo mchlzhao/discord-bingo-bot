@@ -89,7 +89,7 @@ class GameEngine:
                     'No event description matches search string.'))
             elif len(hit_events) > 1:
                 error_str = (
-                    'More than one event description matches search string.\n'
+                    f'More than one event description matches "{desc}".\n'
                     'Matches include:\n'
                     f'{hit_events[0].desc}\n'
                     f'{hit_events[1].desc}'
@@ -99,7 +99,7 @@ class GameEngine:
                 return GameEngineResponse(display_error=error_str)
             else:
                 return GameEngineResponse({'event': hit_events[0]})
-        raise ValueError('No event has been specified.')
+        raise ValueError('No search method has been specified.')
 
     def hit(self, server_id: str, *, index: int = None, desc: str = None) \
             -> GameEngineResponse:
@@ -177,6 +177,7 @@ class GameEngine:
                 display_error='No game is currently running.')
 
         events = self.event_repo.read_all_events(game.game_id)
+        events.sort(key=lambda event: event.index)
         return GameEngineResponse({'events': events})
 
     def view_progress(self, server_id: str) -> GameEngineResponse:
