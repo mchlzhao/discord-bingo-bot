@@ -177,6 +177,7 @@ class GameEngine:
                 display_error='No game is currently running.')
 
         events = self.event_repo.read_all_events(game.game_id)
+        events.sort(key=lambda event: event.index)
         return GameEngineResponse({'events': events})
 
     def view_progress(self, server_id: str) -> GameEngineResponse:
