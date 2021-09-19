@@ -1,12 +1,13 @@
 from discord.ext import commands
 
-from src.bot.common_cog import CommonCog
+from src.bot.base_cog import BaseCog
+from src.bot.display_error import DisplayError
 from src.bot.util import (
     to_ordinal_with_podium_emoji, COMBO_SIZE, NUM_COMBOS, MAX_EVENTS)
 from src.core.game_engine import GameEngine
 
 
-class GameManagementCog(commands.Cog, CommonCog):
+class GameManagementCog(BaseCog):
     def __init__(self, bot: commands.Bot, engine: GameEngine):
         self.bot = bot
         self.engine = engine
@@ -16,13 +17,10 @@ class GameManagementCog(commands.Cog, CommonCog):
     async def start_game(self, ctx, *args):
         event_strs = list(map(str, args))
         if len(event_strs) > MAX_EVENTS:
-            await self.display_error_reply(
-                ctx, f'There can only be up to {MAX_EVENTS} events.')
-            return
+            raise DisplayError(f'There can only be up to {MAX_EVENTS} events.')
         response = self.engine.start_game(str(ctx.guild.id), event_strs)
         if response.display_error is not None:
-            await self.display_error_reply(ctx, response.display_error)
-            return
+            raise DisplayError(response.display_error)
         embed = self.custom_embed(
             '🚀 Game has Started!',
             f'Choose {NUM_COMBOS} combos of {COMBO_SIZE} events from the following:',
@@ -36,8 +34,7 @@ class GameManagementCog(commands.Cog, CommonCog):
         # TODO: present confirmation prompt
         response = self.engine.finish_game(str(ctx.guild.id))
         if response.display_error is not None:
-            await self.display_error_reply(ctx, response.display_error)
-            return
+            raise DisplayError(response.display_error)
 
         # TODO: show podium, final events and progress
         embed = self.custom_embed(
