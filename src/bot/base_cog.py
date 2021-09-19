@@ -3,12 +3,13 @@ from typing import List, Tuple, Optional
 import discord
 from discord.ext import commands
 
-from src.bot.util import ERROR_EMOJI, SPACER_EMOJI, index_to_emoji, hit_emoji
+from src.bot.display_error import DisplayError
+from src.bot.util import SPACER_EMOJI, index_to_emoji, hit_emoji
 from src.entities.combo_set import ComboSet
 from src.entities.event import Event
 
 
-class CommonCog:
+class BaseCog(commands.Cog):
     def custom_embed(self, title: str, desc: Optional[str],
                      fields: List[Tuple[str, str]] = [],
                      inline=True) -> discord.Embed:
@@ -20,13 +21,6 @@ class CommonCog:
         for name, value in fields:
             embed.add_field(name=name, value=value, inline=inline)
         return embed
-
-    async def display_error_reply(self, ctx: commands.Context,
-                                  error_message: str) -> None:
-        embed = discord.Embed(
-            title=f'{ERROR_EMOJI} Error', description=error_message,
-            colour=discord.Colour.dark_red())
-        await ctx.message.reply(embed=embed)
 
     def events_to_fields(self, events: List[Event],
                          include_is_hit: bool) -> List[Tuple[str, str]]:
@@ -51,3 +45,12 @@ class CommonCog:
             combo_hit_strs.append(hit_str)
         return (SPACER_EMOJI.join(combo_event_strs),
                 SPACER_EMOJI.join(combo_hit_strs))
+
+    async def cog_command_error(self, ctx, error):
+        if isinstance(error, commands.CommandNotFound):
+            await ctx.message.reply(
+                "Command not found. Use <>help to view info on all commands.")
+        elif isinstance(error, DisplayError):
+            await ctx.message.reply(embed=error.get_embed())
+        else:
+            raise error

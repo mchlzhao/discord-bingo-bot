@@ -1,11 +1,12 @@
 from discord.ext import commands
 
-from src.bot.common_cog import CommonCog
+from src.bot.base_cog import BaseCog
+from src.bot.display_error import DisplayError
 from src.bot.util import HIDDEN_EMOJI, SPACER_EMOJI, NUM_COMBOS, COMBO_SIZE
 from src.core.game_engine import GameEngine
 
 
-class ViewGameCog(commands.Cog, CommonCog):
+class ViewGameCog(BaseCog):
     def __init__(self, bot: commands.Bot, engine: GameEngine):
         self.bot = bot
         self.engine = engine
@@ -14,8 +15,7 @@ class ViewGameCog(commands.Cog, CommonCog):
     async def view_events(self, ctx):
         response = self.engine.view_events(str(ctx.guild.id))
         if response.display_error is not None:
-            await self.display_error_reply(ctx, response.display_error)
-            return
+            raise DisplayError(response.display_error)
         embed = self.custom_embed(
             '🎲 List of Events', None,
             self.events_to_fields(response.response['events'], True)
@@ -27,8 +27,7 @@ class ViewGameCog(commands.Cog, CommonCog):
         # TODO: view progress for specific players
         response = self.engine.view_progress(str(ctx.guild.id))
         if response.display_error is not None:
-            await self.display_error_reply(ctx, response.display_error)
-            return
+            raise DisplayError(response.display_error)
         combo_sets = response.response['combo_sets']
         combo_sets_named = [
             ((await ctx.guild.fetch_member(combo_set.player_id)).display_name,
