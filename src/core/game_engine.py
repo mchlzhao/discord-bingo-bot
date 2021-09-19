@@ -101,8 +101,8 @@ class GameEngine:
                 return GameEngineResponse({'event': hit_events[0]})
         raise ValueError('No search method has been specified.')
 
-    def hit(self, server_id: str, *, index: int = None, desc: str = None) \
-            -> GameEngineResponse:
+    def change_hit(self, server_id: str, is_hit: bool, *, index: int = None,
+                   desc: str = None) -> GameEngineResponse:
         game = self.game_repo.read_active_game(server_id)
         if game is None:
             return GameEngineResponse(
@@ -111,42 +111,29 @@ class GameEngine:
         response = self._search_event(game.game_id, index=index, desc=desc)
         if response.display_error is not None:
             return response
-        hit_event = response.response['event']
-        if hit_event.is_hit:
+        event = response.response['event']
+        if is_hit and event.is_hit:
             return GameEngineResponse(
-                display_error=f'Event "{hit_event.desc}" has already been hit.'
+                display_error=f'Event "{event.desc}" has already been hit.'
             )
-        hit_event.is_hit = True
-        self.event_repo.update_event(game.game_id, hit_event)
-        return GameEngineResponse({'event': hit_event})
-
-    def unhit(self, server_id: str, *, index: int = None, desc: str = None) \
-            -> GameEngineResponse:
-        game = self.game_repo.read_active_game(server_id)
-        if game is None:
+        elif not is_hit and not event.is_hit:
             return GameEngineResponse(
-                display_error='No game is currently running.')
+                display_error=f'Event "{event.desc}" is already unhit.')
+        event.is_hit = is_hit
+        self.event_repo.update_event(game.game_id, event)
 
-        response = self._search_event(game.game_id, index=index, desc=desc)
-        if response.display_error is not None:
-            return response
-        unhit_event = response.response['event']
-        if not unhit_event.is_hit:
-            return GameEngineResponse(
-                display_error=f'Event "{unhit_event.desc}" is already unhit.')
-        unhit_event.is_hit = False
-        self.event_repo.update_event(game.game_id, unhit_event)
+        if not is_hit:
+            # some players may have lost their win consequently
+            combo_sets = self.player_repo.read_all_combo_sets(game.game_id)
+            entries = self.player_repo.read_all_entries(game.game_id)
+            entry_by_player_id = {entry.player_id: entry for entry in entries}
+            for combo_set in combo_sets:
+                entry = entry_by_player_id[combo_set.player_id]
+                if entry.time_won is not None and not combo_set.has_won():
+                    entry.time_won = None
+                    self.player_repo.update_entry(entry)
 
-        # some players may have lost their win consequently
-        combo_sets = self.player_repo.read_all_combo_sets(game.game_id)
-        entries = self.player_repo.read_all_entries(game.game_id)
-        entry_by_player_id = {entry.player_id: entry for entry in entries}
-        for combo_set in combo_sets:
-            entry = entry_by_player_id[combo_set.player_id]
-            if entry.time_won is not None and not combo_set.has_won():
-                entry.time_won = None
-                self.player_repo.update_entry(entry)
-        return GameEngineResponse({'event': unhit_event})
+        return GameEngineResponse({'event': event})
 
     def bingo(self, server_id: str, player_id: str) -> GameEngineResponse:
         game = self.game_repo.read_active_game(server_id)
