@@ -57,18 +57,16 @@ class GameEngine:
         combos = []
         for combo_index, event_indices in enumerate(combo_set_indices):
             try:
-                combos.append(Combo(None, [events[i]
-                                           for i in event_indices],
+                combos.append(Combo(None, [events[i] for i in event_indices],
                                     combo_index))
             except IndexError:
                 return GameEngineResponse(display_error=(
-                    f'Combo {combo_index + 1} is invalid: Invalid event index.'
-                ))
+                    f'Combo {combo_index + 1} contains invalid event index.'))
 
         self.player_repo.delete_entry(game.game_id, player_id)
         combo_set = ComboSet(player_id, combos)
-
         self.player_repo.create_entry(game.game_id, combo_set)
+
         return GameEngineResponse()
 
     def _search_event(self, game_id, *, index: Optional[int],
@@ -82,23 +80,20 @@ class GameEngine:
                 return GameEngineResponse(display_error='Invalid event index.')
             return GameEngineResponse({'event': hit_event})
         if desc is not None:
-            hit_events = list(filter(
+            matches = list(filter(
                 lambda event: desc.lower() in event.desc.lower(), events))
-            if len(hit_events) == 0:
+            if len(matches) == 0:
                 return GameEngineResponse(display_error=(
                     'No event description matches search string.'))
-            elif len(hit_events) > 1:
+            elif len(matches) > 1:
                 error_str = (
                     f'More than one event description matches "{desc}".\n'
-                    'Matches include:\n'
-                    f'{hit_events[0].desc}\n'
-                    f'{hit_events[1].desc}'
-                )
-                if len(hit_events) > 2:
+                    f'Matches include: {matches[0].desc}\n{matches[1].desc}')
+                if len(matches) > 2:
                     error_str += '\n...'
                 return GameEngineResponse(display_error=error_str)
             else:
-                return GameEngineResponse({'event': hit_events[0]})
+                return GameEngineResponse({'event': matches[0]})
         raise ValueError('No search method has been specified.')
 
     def change_hit(self, server_id: str, is_hit: bool, *, index: int = None,
@@ -114,8 +109,7 @@ class GameEngine:
         event = response.response['event']
         if is_hit and event.is_hit:
             return GameEngineResponse(
-                display_error=f'Event "{event.desc}" has already been hit.'
-            )
+                display_error=f'Event "{event.desc}" has already been hit.')
         elif not is_hit and not event.is_hit:
             return GameEngineResponse(
                 display_error=f'Event "{event.desc}" is already unhit.')
