@@ -47,10 +47,7 @@ class BaseCog(commands.Cog):
                 SPACER_EMOJI.join(combo_hit_strs))
 
     async def cog_command_error(self, ctx, error):
-        if isinstance(error, commands.CommandNotFound):
-            await ctx.message.reply(
-                "Command not found. Use <>help to view info on all commands.")
-        elif isinstance(error, DisplayError):
+        if isinstance(error, DisplayError):
             await ctx.message.reply(embed=error.get_embed())
         else:
             raise error

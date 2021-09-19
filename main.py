@@ -39,5 +39,13 @@ bot.add_cog(GameManagementCog(bot, engine))
 bot.add_cog(PlayerControlCog(bot, engine))
 bot.add_cog(ViewGameCog(bot, engine))
 
+
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CommandNotFound):
+        await ctx.message.reply(
+            "Command not found. Use <>help to view info on all commands.")
+
+
 TOKEN = os.environ['DISCORD_TOKEN']
 bot.run(TOKEN)
