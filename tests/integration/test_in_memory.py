@@ -45,14 +45,14 @@ class TestInMemoryIntegration(unittest.TestCase):
             [f'event {i}' for i in range(11)])
         self.game_engine.set_entry(self.server_id, self.player_id,
                                    [[0, 1, 2], [3, 4, 5]])
-        self.game_engine.hit(self.server_id, index=0)
+        self.game_engine.change_hit(self.server_id, True, index=0)
         response = self.game_engine.bingo(self.server_id, self.player_id)
         self.assertIsNotNone(response.display_error)
 
-        self.game_engine.hit(self.server_id, index=1)
+        self.game_engine.change_hit(self.server_id, True, index=1)
         response = self.game_engine.bingo(self.server_id, self.player_id)
         self.assertIsNotNone(response.display_error)
 
-        self.game_engine.hit(self.server_id, index=2)
+        self.game_engine.change_hit(self.server_id, True, index=2)
         response = self.game_engine.bingo(self.server_id, self.player_id)
         self.assertIsNone(response.display_error)
