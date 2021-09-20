@@ -12,13 +12,13 @@ class PostgresEventRepo(IEventRepo):
             -> List[Event]:
         query = '''INSERT INTO GameEvent
                    (game_id, event_desc, index_in_game, is_hit)
-                   VALUES'''
+                   VALUES '''
         event_tups = [(game_id, desc, index)
                       for index, desc in enumerate(event_strs)]
         cur = self.conn.cursor()
         args = ','.join(cur.mogrify('(%s, %s, %s, FALSE)', event_tup)
                         .decode('utf-8') for event_tup in event_tups)
-        cur.execute(query + args + 'RETURNING event_id')
+        cur.execute(query + args + ' RETURNING event_id')
         events = []
         for data in zip(event_tups, cur.fetchall()):
             events.append(

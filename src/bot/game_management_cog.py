@@ -2,8 +2,9 @@ from discord.ext import commands
 
 from src.bot.base_cog import BaseCog
 from src.bot.display_error import DisplayError
+from src.bot.embed_generator import EmbedGenerator
 from src.bot.util import (
-    to_ordinal_with_podium_emoji, COMBO_SIZE, NUM_COMBOS, MAX_EVENTS)
+    MAX_EVENTS)
 from src.core.game_engine import GameEngine
 
 
@@ -16,17 +17,15 @@ class GameManagementCog(BaseCog):
                       aliases=['start', 'game.begin', 'begin'])
     async def start_game(self, ctx, *args):
         event_strs = list(map(str, args))
+        if len(event_strs) == 0:
+            raise DisplayError('You need to specify some events.')
         if len(event_strs) > MAX_EVENTS:
             raise DisplayError(f'There can only be up to {MAX_EVENTS} events.')
         response = self.engine.start_game(str(ctx.guild.id), event_strs)
         if response.display_error is not None:
             raise DisplayError(response.display_error)
-        embed = self.custom_embed(
-            '🚀 Game has Started!',
-            f'Choose {NUM_COMBOS} combos of {COMBO_SIZE} events from the following:',
-            self.events_to_fields(response.response['events'], False)
-        )
-        await ctx.send(embed=embed)
+        await ctx.send(
+            embed=EmbedGenerator.get_start_embed(response.response['events']))
 
     @commands.command(name='game.finish',
                       aliases=['finish', 'game.end', 'end'])
@@ -35,20 +34,5 @@ class GameManagementCog(BaseCog):
         response = self.engine.finish_game(str(ctx.guild.id))
         if response.display_error is not None:
             raise DisplayError(response.display_error)
-
-        # TODO: show podium, final events and progress
-        embed = self.custom_embed(
-            '🏁 Game has Finished!',
-            'Thank you for playing! 💙'
-        )
-        if len(response.response['entries']) > 0:
-            podium_text = [f'<@{entry.player_id}>'
-                           for entry in response.response['entries']]
-            podium_text = [f'{to_ordinal_with_podium_emoji(i + 1)}: {text}'
-                           for i, text in enumerate(podium_text)]
-            embed.add_field(name='Here are the winners:\n',
-                            value='\n'.join(podium_text))
-        else:
-            embed.add_field(name='Here are the winners:\n',
-                            value='There were no winners :cry:')
-        await ctx.send(embed=embed)
+        await ctx.send(
+            embed=EmbedGenerator.get_end_embed(response.response['entries']))
