@@ -14,7 +14,7 @@ class InMemoryPlayerRepo(IPlayerRepo):
     def create_entry(self, game_id: int, combo_set: ComboSet) -> None:
         self.next_entry_id += 1
         self.data_store.entries[game_id][combo_set.player_id] = \
-            Entry(str(self.next_entry_id), game_id, combo_set.player_id, None)
+            Entry(self.next_entry_id, game_id, combo_set.player_id, None)
         self.data_store.combo_sets[game_id][combo_set.player_id] = combo_set
 
     def read_combo_set(self, game_id: int, player_id: str) \
