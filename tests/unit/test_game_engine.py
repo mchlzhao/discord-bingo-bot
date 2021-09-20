@@ -23,7 +23,7 @@ class TestGameEngine(unittest.TestCase):
         self.fake_game = Game(0, self.fake_server_id,
                               datetime.now(), None)
         self.fake_event = Event(0, self.fake_game.game_id, 'event', 0)
-        self.fake_entry = Entry('entry', self.fake_game.game_id,
+        self.fake_entry = Entry(0, self.fake_game.game_id,
                                 self.fake_player_id, None)
 
     def assertResponseDisplayErrorContains(self, response: GameEngineResponse,
