@@ -15,6 +15,7 @@ from src.repos.in_memory.in_memory_player_repo import InMemoryPlayerRepo
 from src.repos.postgres.postgres_event_repo import PostgresEventRepo
 from src.repos.postgres.postgres_game_repo import PostgresGameRepo
 from src.repos.postgres.postgres_player_repo import PostgresPlayerRepo
+from tests.unit.discord_graphics.test_embeds import TestEmbedsCog
 
 USE_IN_MEMORY = False
 
@@ -38,6 +39,7 @@ bot.add_cog(EventHittingCog(bot, engine))
 bot.add_cog(GameManagementCog(bot, engine))
 bot.add_cog(PlayerControlCog(bot, engine))
 bot.add_cog(ViewGameCog(bot, engine))
+bot.add_cog(TestEmbedsCog())
 
 
 @bot.event

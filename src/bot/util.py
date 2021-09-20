@@ -1,6 +1,5 @@
 SUCCESS_EMOJI = '👍'
 FAILURE_EMOJI = '👎'
-ERROR_EMOJI = '❌'
 HIT_EMOJI = '🟢'
 UNHIT_EMOJI = '🔴'
 SPACER_EMOJI = '▪️'

@@ -2,6 +2,7 @@ from discord.ext import commands
 
 from src.bot.base_cog import BaseCog
 from src.bot.display_error import DisplayError
+from src.bot.embed_generator import EmbedGenerator
 from src.bot.util import (NUM_COMBOS, COMBO_SIZE, char_to_index, SUCCESS_EMOJI)
 from src.core.game_engine import GameEngine
 
@@ -22,13 +23,13 @@ class PlayerControlCog(BaseCog):
 
         if len(event_indices) != NUM_COMBOS * COMBO_SIZE:
             raise DisplayError('Entry is invalid: must have ' +
-                               '{NUM_COMBOS} boards of {COMBO_SIZE}')
+                               f'{NUM_COMBOS} boards of {COMBO_SIZE}')
 
         combos = []
         for i in range(0, NUM_COMBOS * COMBO_SIZE, COMBO_SIZE):
             combo_indices = sorted(event_indices[i:i + COMBO_SIZE])
             if combo_indices != sorted(list(set(combo_indices))):
-                raise DisplayError(f'Combo {i // COMBO_SIZE + 1} is invalid:' +
+                raise DisplayError(f'Combo {i // COMBO_SIZE + 1} is invalid: ' +
                                    'Events must be unique.')
             combos.append(combo_indices)
         combos.sort()
@@ -45,12 +46,7 @@ class PlayerControlCog(BaseCog):
         response = self.engine.bingo(str(ctx.guild.id), str(ctx.author.id))
         if response.display_error is not None:
             raise DisplayError(response.display_error)
-        embed = self.custom_embed(
-            '🏆 🥳 🎉 Bingo!',
-            f'<@{ctx.author.id}> has just won!'
-        )
-        # TODO: show the winning board
-        await ctx.send(embed=embed)
+        await ctx.send(embed=EmbedGenerator.get_bingo_embed(ctx.author.id))
 
     @commands.command(name='bingo', aliases=['bingo!', 'BINGO'])
     async def no_bingo(self, ctx):
