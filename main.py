@@ -1,3 +1,4 @@
+import argparse
 import os
 
 import psycopg2
@@ -17,9 +18,15 @@ from src.repos.postgres.postgres_game_repo import PostgresGameRepo
 from src.repos.postgres.postgres_player_repo import PostgresPlayerRepo
 from tests.unit.discord_graphics.test_embeds import TestEmbedsCog
 
-USE_IN_MEMORY = False
+parser = argparse.ArgumentParser()
+parser.add_argument('--in_memory', help='Switch to in-memory data store',
+                    action='store_true')
+parser.add_argument('--test_embeds',
+                    help='Enable commands to display mock embeds',
+                    action='store_true')
+args = parser.parse_args()
 
-if USE_IN_MEMORY:
+if args.in_memory:
     data_store = DataStore()
     event_repo = InMemoryEventRepo(data_store)
     game_repo = InMemoryGameRepo(data_store)
@@ -39,14 +46,15 @@ bot.add_cog(EventHittingCog(bot, engine))
 bot.add_cog(GameManagementCog(bot, engine))
 bot.add_cog(PlayerControlCog(bot, engine))
 bot.add_cog(ViewGameCog(bot, engine))
-bot.add_cog(TestEmbedsCog())
+if args.test_embeds:
+    bot.add_cog(TestEmbedsCog())
 
 
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
         await ctx.message.reply(
-            "Command not found. Use <>help to view info on all commands.")
+            'Command not found. Use <>help to view info on all commands.')
 
 
 TOKEN = os.environ['DISCORD_TOKEN']

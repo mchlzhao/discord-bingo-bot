@@ -11,8 +11,8 @@ from src.entities.event import Event
 
 
 class TestEmbedsCog(commands.Cog):
-    @commands.command(name='display_embeds')
-    async def display_embeds(self, ctx):
+    @commands.command(name='test_embeds')
+    async def test_embeds(self, ctx):
         events = [Event(0, 0, 'Event1', 0), Event(1, 0, 'Event2', 1),
                   Event(2, 0, 'Event3', 2)]
         await ctx.send(embed=EmbedGenerator.get_start_embed(events))
