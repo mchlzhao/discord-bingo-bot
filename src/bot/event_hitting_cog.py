@@ -8,7 +8,7 @@ from src.core.game_engine import GameEngine
 from src.entities.event import Event
 
 
-class EventHittingCog(BaseCog):
+class EventHittingCog(BaseCog, name='Event Hitting'):
     def __init__(self, bot: commands.Bot, engine: GameEngine):
         self.bot = bot
         self.engine = engine
@@ -28,12 +28,16 @@ class EventHittingCog(BaseCog):
             raise DisplayError(response.display_error)
         return response.response['event']
 
-    @commands.command(name='hit')
+    @commands.command(name='hit',
+                      description='Check off an event when it has occurred.',
+                      usage='<event index|desc substring>')
     async def hit(self, ctx, *args):
         event = self.change_hit(True, ctx, *args)
         await ctx.send(embed=EmbedGenerator.get_event_hit_embed(event))
 
-    @commands.command(name='unhit')
+    @commands.command(name='unhit',
+                      description='Undo the hitting of an event.',
+                      usage='<event index|desc substring>')
     async def unhit(self, ctx, *args):
         event = self.change_hit(False, ctx, *args)
         await ctx.send(embed=EmbedGenerator.get_event_hit_embed(event))

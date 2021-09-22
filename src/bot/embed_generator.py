@@ -15,7 +15,7 @@ def get_content_embed(**kwargs):
 
 
 def get_error_embed(**kwargs):
-    return discord.Embed(colour=discord.Colour.blue(), **kwargs)
+    return discord.Embed(colour=discord.Colour.dark_red(), **kwargs)
 
 
 def get_event_str(event: Event):
@@ -110,7 +110,12 @@ class EmbedGenerator:
 
     @staticmethod
     def get_error_embed(display_error: DisplayError):
-        return discord.Embed(
+        return get_error_embed(
             title='❌ Error',
-            description=display_error.error_message,
-            colour=discord.Colour.dark_red())
+            description=display_error.error_message)
+
+    @staticmethod
+    def get_help_embed(desc: str):
+        return get_content_embed(
+            title='🎲 BingoBot Help',
+            description=desc)
