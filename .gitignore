@@ -1,8 +1,6 @@
 __pycache__/
 env/
-.env
 *.swp
-*.dat
 .DS_Store
 .vscode
 .idea

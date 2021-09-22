@@ -26,7 +26,7 @@ class DataStore:
         game_id = 1
         player_id = 'player_id'
         self.entries[game_id][player_id] = \
-            Entry('entry_id', game_id, 'player_id', None)
+            Entry(0, game_id, 'player_id', None)
 
     def _sample_combo_set(self):
         game_id = 1
