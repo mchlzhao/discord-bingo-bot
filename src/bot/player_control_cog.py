@@ -7,12 +7,14 @@ from src.bot.util import (NUM_COMBOS, COMBO_SIZE, char_to_index, SUCCESS_EMOJI)
 from src.core.game_engine import GameEngine
 
 
-class PlayerControlCog(BaseCog):
+class PlayerControlCog(BaseCog, name='Player Control'):
     def __init__(self, bot: commands.Bot, engine: GameEngine):
         self.bot = bot
         self.engine = engine
 
-    @commands.command(name='set_entry', aliases=['set', 'entry'])
+    @commands.command(name='set',
+                      description='Choose your combos of events.',
+                      usage='<ABC ABC...>')
     async def set_entry(self, ctx, *args):
         # flatten all args into a single list of chars
         event_index_chars = [c for sublist in map(list, args) for c in sublist]
@@ -40,7 +42,8 @@ class PlayerControlCog(BaseCog):
             raise DisplayError(response.display_error)
         await ctx.message.add_reaction(SUCCESS_EMOJI)
 
-    @commands.command(name='BINGO!')
+    @commands.command(name='BINGO!',
+                      description='Yell out in order to win.')
     async def bingo(self, ctx):
         # TODO: add user cooldown
         response = self.engine.bingo(str(ctx.guild.id), str(ctx.author.id))
@@ -48,6 +51,6 @@ class PlayerControlCog(BaseCog):
             raise DisplayError(response.display_error)
         await ctx.send(embed=EmbedGenerator.get_bingo_embed(ctx.author.id))
 
-    @commands.command(name='bingo', aliases=['bingo!', 'BINGO'])
+    @commands.command(name='bingo', aliases=['bingo!', 'BINGO'], hidden=True)
     async def no_bingo(self, ctx):
         raise DisplayError('Say it louder! "BINGO!"')

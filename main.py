@@ -6,7 +6,9 @@ from discord.ext import commands
 
 from src.bot.event_hitting_cog import EventHittingCog
 from src.bot.game_management_cog import GameManagementCog
+from src.bot.help import Help
 from src.bot.player_control_cog import PlayerControlCog
+from src.bot.util import COMMAND_PREFIX
 from src.bot.view_game_cog import ViewGameCog
 from src.core.game_engine import GameEngine
 from src.repos.in_memory.data_store import DataStore
@@ -41,7 +43,7 @@ else:
 
 engine = GameEngine(event_repo, game_repo, player_repo)
 
-bot = commands.Bot(command_prefix='<>', help_command=None)
+bot = commands.Bot(command_prefix=COMMAND_PREFIX, help_command=Help())
 bot.add_cog(EventHittingCog(bot, engine))
 bot.add_cog(GameManagementCog(bot, engine))
 bot.add_cog(PlayerControlCog(bot, engine))

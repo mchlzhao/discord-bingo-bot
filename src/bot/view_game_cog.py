@@ -1,3 +1,6 @@
+from typing import List, Optional
+
+import discord
 from discord.ext import commands
 
 from src.bot.base_cog import BaseCog
@@ -6,12 +9,13 @@ from src.bot.embed_generator import EmbedGenerator
 from src.core.game_engine import GameEngine
 
 
-class ViewGameCog(BaseCog):
+class ViewGameCog(BaseCog, name='View Game'):
     def __init__(self, bot: commands.Bot, engine: GameEngine):
         self.bot = bot
         self.engine = engine
 
-    @commands.command(name='view.events', aliases=['events'])
+    @commands.command(name='events',
+                      description='List all events in an ongoing game.')
     async def view_events(self, ctx):
         response = self.engine.view_events(str(ctx.guild.id))
         if response.display_error is not None:
@@ -19,8 +23,9 @@ class ViewGameCog(BaseCog):
         await ctx.send(
             embed=EmbedGenerator.get_events_embed(response.response['events']))
 
-    @commands.command(name='view.progress', aliases=['progress'])
-    async def view_progress(self, ctx, *args):
+    @commands.command(name='progress',
+                      description='List all player entries in an ongoing game.')
+    async def view_progress(self, ctx, members: Optional[List[discord.Member]]):
         # TODO: view progress for specific players
         response = self.engine.view_progress(str(ctx.guild.id))
         if response.display_error is not None:

@@ -1,3 +1,5 @@
+COMMAND_PREFIX = '<>'
+
 SUCCESS_EMOJI = '👍'
 FAILURE_EMOJI = '👎'
 HIT_EMOJI = '🟢'
