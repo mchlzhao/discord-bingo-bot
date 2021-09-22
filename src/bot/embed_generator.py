@@ -2,7 +2,6 @@ from typing import List, Tuple
 
 import discord
 
-from src.bot.display_error import DisplayError
 from src.bot.util import index_to_emoji, COMBO_SIZE, NUM_COMBOS, \
     to_ordinal_with_podium_emoji, hit_emoji, SPACER_EMOJI, HIDDEN_EMOJI
 from src.entities.combo_set import ComboSet
@@ -41,7 +40,7 @@ class EmbedGenerator:
     def get_start_embed(events: List[Event]):
         embed = get_content_embed(
             title='🚀 Game has Started!',
-            description=f'Choose {NUM_COMBOS} combos of {COMBO_SIZE} events' + \
+            description=f'Choose {NUM_COMBOS} combos of {COMBO_SIZE} events' +
                         ' from the following:')
         for event in events:
             embed.add_field(name=f'Event {index_to_emoji(event.index)}',
@@ -109,10 +108,10 @@ class EmbedGenerator:
         return embed
 
     @staticmethod
-    def get_error_embed(display_error: DisplayError):
+    def get_error_embed(error_message: str):
         return get_error_embed(
             title='❌ Error',
-            description=display_error.error_message)
+            description=error_message)
 
     @staticmethod
     def get_help_embed(desc: str):

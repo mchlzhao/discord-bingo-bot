@@ -27,3 +27,9 @@ class Help(commands.HelpCommand):
 
         channel = self.get_destination()
         await channel.send(embed=embed)
+
+    async def send_error_message(self, error):
+        embed = EmbedGenerator.get_error_embed(error)
+
+        channel = self.get_destination()
+        await channel.send(embed=embed)
