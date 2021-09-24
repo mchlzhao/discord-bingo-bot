@@ -15,7 +15,7 @@ class GameManagementCog(BaseCog, name='Game Management'):
 
     @commands.command(name='start',
                       description='Start a game with a list of events.',
-                      usage='<event descs...>')
+                      usage='<event descrs...>')
     async def start_game(self, ctx, *args):
         event_strs = list(map(str, args))
         if len(event_strs) == 0:
