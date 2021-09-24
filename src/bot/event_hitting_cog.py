@@ -30,14 +30,14 @@ class EventHittingCog(BaseCog, name='Event Hitting'):
 
     @commands.command(name='hit',
                       description='Check off an event when it has occurred.',
-                      usage='<event index|desc substring>')
+                      usage='<event index|descr substring>')
     async def hit(self, ctx, *args):
         event = self.change_hit(True, ctx, *args)
         await ctx.send(embed=EmbedGenerator.get_event_hit_embed(event))
 
     @commands.command(name='unhit',
                       description='Undo the hitting of an event.',
-                      usage='<event index|desc substring>')
+                      usage='<event index|descr substring>')
     async def unhit(self, ctx, *args):
         event = self.change_hit(False, ctx, *args)
         await ctx.send(embed=EmbedGenerator.get_event_hit_embed(event))

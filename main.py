@@ -4,6 +4,7 @@ import os
 import psycopg2
 from discord.ext import commands
 
+from src.bot.embed_generator import EmbedGenerator
 from src.bot.event_hitting_cog import EventHittingCog
 from src.bot.game_management_cog import GameManagementCog
 from src.bot.help import Help
@@ -55,8 +56,8 @@ if args.test_embeds:
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
-        await ctx.message.reply(
-            'Command not found. Use <>help to view info on all commands.')
+        await ctx.message.reply(embed=EmbedGenerator.get_error_embed(
+            'Command not found. Use <>help to view a list of all commands.'))
 
 
 TOKEN = os.environ['DISCORD_TOKEN']
