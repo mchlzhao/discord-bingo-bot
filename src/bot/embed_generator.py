@@ -37,6 +37,18 @@ def combo_set_to_emoji(combo_set: ComboSet) -> Tuple[str, str]:
 
 class EmbedGenerator:
     @staticmethod
+    def _get_podium_text(entries: List[Entry], game_ended: bool):
+        if len(entries) > 0:
+            winners = [f'<@{entry.player_id}>' for entry in entries]
+            podium_text = [f'{to_ordinal_with_podium_emoji(i + 1)}: {winner}'
+                           for i, winner in enumerate(winners)]
+            podium_text[0] += ' 👑'
+            return '\n'.join(podium_text)
+        if game_ended:
+            return 'There were no winners 😢'
+        return 'There are currently no winners 😢'
+
+    @staticmethod
     def get_start_embed(events: List[Event]):
         embed = get_content_embed(
             title='🚀 Game has Started!',
@@ -53,15 +65,8 @@ class EmbedGenerator:
         embed = get_content_embed(
             title='🏁 Game has Finished!',
             description='Thank you for playing! 💙')
-        if len(entries) > 0:
-            podium_text = [f'<@{entry.player_id}>' for entry in entries]
-            podium_text = [f'{to_ordinal_with_podium_emoji(i + 1)}: {text}'
-                           for i, text in enumerate(podium_text)]
-            embed.add_field(name='Here are the winners:\n',
-                            value='\n'.join(podium_text))
-        else:
-            embed.add_field(name='Here are the winners:\n',
-                            value='There were no winners :cry:')
+        embed.add_field(name='Winners:',
+                        value=EmbedGenerator._get_podium_text(entries, True))
         return embed
 
     @staticmethod
@@ -93,7 +98,10 @@ class EmbedGenerator:
                            game_has_started: bool):
         embed = get_content_embed(title='🎲 Player Progress')
         if len(combo_sets_named) == 0:
-            embed.description = 'No players have set an entry yet.'
+            if game_has_started:
+                embed.description = 'No players have set an entry.'
+            else:
+                embed.description = 'No players have set an entry yet.'
             return embed
 
         for name, combo_set in combo_sets_named:
@@ -101,20 +109,29 @@ class EmbedGenerator:
             if game_has_started:
                 entry = '\n'.join(combo_set_emojis)
             else:
+                # this is known to render incredibly large on mobile if the
+                # number of total emojis is small
                 hidden_emojis = SPACER_EMOJI.join(
-                    [HIDDEN_EMOJI * COMBO_SIZE] * NUM_COMBOS)
-                entry = hidden_emojis + '\n' + combo_set_emojis[1]
+                    [''.join([HIDDEN_EMOJI * len(combo.events)])
+                     for combo in combo_set.combos])
+                entry = f'{hidden_emojis}\n{combo_set_emojis[1]}'
             embed.add_field(name=name, value=entry, inline=False)
         return embed
 
     @staticmethod
-    def get_error_embed(error_message: str):
-        return get_error_embed(
-            title='❌ Error',
-            description=error_message)
+    def get_winners_embed(entries: List[Entry]):
+        return get_content_embed(
+            title='🏆 Winners',
+            description=EmbedGenerator._get_podium_text(entries, False))
 
     @staticmethod
     def get_help_embed(desc: str):
         return get_content_embed(
             title='🎲 BingoBot Help',
             description=desc)
+
+    @staticmethod
+    def get_error_embed(error_message: str):
+        return get_error_embed(
+            title='❌ Error',
+            description=error_message)

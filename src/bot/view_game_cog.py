@@ -38,3 +38,12 @@ class ViewGameCog(BaseCog, name='View Game'):
         await ctx.send(
             embed=EmbedGenerator.get_progress_embed(
                 combo_sets_named, response.response['game_has_started']))
+
+    @commands.command(name='winners',
+                      description='List all players who have won so far.')
+    async def view_winners(self, ctx):
+        response = self.engine.view_winners(str(ctx.guild.id))
+        if response.display_error is not None:
+            raise DisplayError(response.display_error)
+        await ctx.send(embed=EmbedGenerator.get_winners_embed(
+            response.response['winning_entries']))

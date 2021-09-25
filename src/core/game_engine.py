@@ -40,7 +40,8 @@ class GameEngine:
         entries = list(filter(lambda e: e.time_won is not None, entries))
         entries.sort(key=lambda e: e.time_won)
         events = self.event_repo.read_all_events(game.game_id)
-        return GameEngineResponse({'entries': entries, 'events': events})
+        return GameEngineResponse(
+            {'winning_entries': entries, 'events': events})
 
     def set_entry(self, server_id: str, player_id: str,
                   combo_set_indices: List[List[int]]) -> GameEngineResponse:
@@ -172,3 +173,14 @@ class GameEngine:
         has_started = any([event.is_hit for event in events])
         return GameEngineResponse({'combo_sets': combo_sets,
                                    'game_has_started': has_started})
+
+    def view_winners(self, server_id: str) -> GameEngineResponse:
+        game = self.game_repo.read_active_game(server_id)
+        if game is None:
+            return GameEngineResponse(
+                display_error='No game is currently running.')
+
+        entries = self.player_repo.read_all_entries(game.game_id)
+        entries = list(filter(lambda e: e.time_won is not None, entries))
+        entries.sort(key=lambda e: e.time_won)
+        return GameEngineResponse({'winning_entries': entries})

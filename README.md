@@ -10,10 +10,9 @@ Players choose combos of events they think will all occur. They are able to win
 only when all the events of any one combo occur. Of course, like in normal
 Bingo, the win only counts once a player shouts "BINGO!"
 
-### Todo
+### TODO
 
 - Add more tests
-- Create help command
 - Implement confirmation system for some commands
 - Delete view embeds after a short time to reduce spam
 - Make number of combos, events per combo customisable

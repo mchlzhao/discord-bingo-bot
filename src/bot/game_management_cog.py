@@ -35,5 +35,5 @@ class GameManagementCog(BaseCog, name='Game Management'):
         response = self.engine.finish_game(str(ctx.guild.id))
         if response.display_error is not None:
             raise DisplayError(response.display_error)
-        await ctx.send(
-            embed=EmbedGenerator.get_end_embed(response.response['entries']))
+        await ctx.send(embed=EmbedGenerator.get_end_embed(
+            response.response['winning_entries']))

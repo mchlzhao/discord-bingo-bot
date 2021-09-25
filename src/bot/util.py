@@ -1,7 +1,6 @@
 COMMAND_PREFIX = '<>'
 
 SUCCESS_EMOJI = '👍'
-FAILURE_EMOJI = '👎'
 HIT_EMOJI = '🟢'
 UNHIT_EMOJI = '🔴'
 SPACER_EMOJI = '▪️'
@@ -43,7 +42,7 @@ def to_ordinal(i):
 
 def to_ordinal_with_podium_emoji(i):
     if i == 1:
-        return '🥇 🏆'
+        return '🥇'
     if i == 2:
         return '🥈'
     if i == 3:
