@@ -12,3 +12,6 @@ class Combo:
 
     def has_won(self):
         return all(map(lambda event: event.is_hit, self.events))
+
+    def __str__(self):
+        return f'Combo id={self.combo_id}: index={self.index} events={self.events}'
