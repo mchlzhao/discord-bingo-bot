@@ -69,7 +69,7 @@ class TestGameEngine(unittest.TestCase):
         self.player_repo.read_all_entries.return_value = []
         self.assertResponseHasKeys(
             self.engine.finish_game(self.fake_server_id),
-            ['entries', 'events'])
+            ['winning_entries', 'events'])
 
         self.game_repo.read_active_game.assert_called_once_with(
             self.fake_server_id)
@@ -418,3 +418,27 @@ class TestGameEngine(unittest.TestCase):
             self.fake_server_id)
         self.player_repo.read_all_combo_sets.assert_not_called()
         self.event_repo.read_all_events.assert_not_called()
+
+    def test_view_winners(self):
+        self.game_repo.read_active_game.return_value = self.fake_game
+        self.player_repo.read_all_entries.return_value = []
+        self.assertResponseHasKeys(
+            self.engine.finish_game(self.fake_server_id),
+            ['winning_entries'])
+
+        self.game_repo.read_active_game.assert_called_once_with(
+            self.fake_server_id)
+        self.player_repo.read_all_entries.assert_called_once_with(
+            self.fake_game.game_id)
+
+    def test_view_winners_no_game_running(self):
+        self.game_repo.read_active_game.return_value = None
+        self.assertResponseDisplayErrorContains(
+            self.engine.finish_game(self.fake_server_id),
+            'No game is currently running.'
+
+        )
+
+        self.game_repo.read_active_game.assert_called_once_with(
+            self.fake_server_id)
+        self.player_repo.read_all_entries.assert_not_called()
