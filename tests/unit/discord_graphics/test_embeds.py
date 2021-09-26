@@ -50,13 +50,13 @@ class TestEmbedsCog(commands.Cog):
     async def test_progress(self, ctx):
         combo_sets_named = [('Player1', combo_set), ('Player2', combo_set)]
         await ctx.send(
-            embed=EmbedGenerator.get_progress_embed([], True))
+            embed=EmbedGenerator.get_progress_embed([], True, False))
         await ctx.send(
-            embed=EmbedGenerator.get_progress_embed([], False))
-        await ctx.send(
-            embed=EmbedGenerator.get_progress_embed(combo_sets_named, True))
-        await ctx.send(
-            embed=EmbedGenerator.get_progress_embed(combo_sets_named, False))
+            embed=EmbedGenerator.get_progress_embed([], False, False))
+        await ctx.send(embed=EmbedGenerator.get_progress_embed(
+            combo_sets_named, True, False))
+        await ctx.send(embed=EmbedGenerator.get_progress_embed(
+            combo_sets_named, False, False))
 
     @commands.command(name='test.winners')
     async def test_winners(self, ctx):
