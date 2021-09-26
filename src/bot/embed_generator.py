@@ -95,13 +95,12 @@ class EmbedGenerator:
 
     @staticmethod
     def get_progress_embed(combo_sets_named: List[Tuple[str, ComboSet]],
-                           game_has_started: bool):
+                           game_has_started: bool, users_specified: bool):
         embed = get_content_embed(title='🎲 Player Progress')
         if len(combo_sets_named) == 0:
-            if game_has_started:
-                embed.description = 'No players have set an entry.'
-            else:
-                embed.description = 'No players have set an entry yet.'
+            embed.description = 'No players{} have set an entry{}.'.format(
+                ' specified' if users_specified else '',
+                ' yet' if not game_has_started else '')
             return embed
 
         for name, combo_set in combo_sets_named:
